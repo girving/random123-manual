@@ -29,8 +29,7 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-#ifndef __open64features_dot_hpp
-#define __open64features_dot_hpp
+#pragma once
 
 /* The gcc features are mostly right.  We just override a few and then include gccfeatures.h */
 
@@ -50,5 +49,3 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif
 
 #include "gccfeatures.h"
-
-#endif

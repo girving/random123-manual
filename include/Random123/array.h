@@ -29,8 +29,7 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-#ifndef _r123array_dot_h__
-#define _r123array_dot_h__
+#pragma once
 #include "features/compilerfeatures.h"
 #include "features/sse.h"
 
@@ -172,7 +171,7 @@ protected:                                                              \
     R123_CUDA_DEVICE r123array##_N##x##W& incr_carefully(R123_ULONG_LONG n){ \
         /* n may be greater than the maximum value of a single value_type */ \
         value_type vtn;                                                 \
-        vtn = n;                                                        \
+        vtn = value_type(n);                                            \
         v[0] += n;                                                      \
         const unsigned rshift = 8* ((sizeof(n)>sizeof(value_type))? sizeof(value_type) : 0); \
         for(size_t i=1; i<_N; ++i){                                     \
@@ -184,7 +183,7 @@ protected:                                                              \
             if( v[i-1] < vtn )                                          \
                 ++n;                                                    \
             if( n==0 ) break;                                           \
-            vtn = n;                                                    \
+            vtn = value_type(n);                                        \
             v[i] += n;                                                  \
         }                                                               \
         return *this;                                                   \
@@ -234,7 +233,7 @@ struct r123arrayextractable<uint8_t>{
     friend std::istream& operator>>(std::istream& is, r123arrayextractable<uint8_t>& t){
         int i;
         is >>  i;
-        t.v = i;
+        t.v = (uint8_t)i;
         return is;
     }
 };
@@ -311,6 +310,3 @@ _r123array_tpl(1, m128i, r123m128i) /* r123array1x128i for ARSni, AESni */
 /** @namespace r123
   Most of the Random123 C++ API is contained in the r123 namespace. 
 */
-
-#endif
-

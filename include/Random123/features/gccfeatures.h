@@ -29,13 +29,12 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-#ifndef __gccfeatures_dot_hpp
-#define __gccfeatures_dot_hpp
+#pragma once
 
 #define GNUC_VERSION (__GNUC__*10000 + __GNUC_MINOR__*100 + __GNUC_PATCHLEVEL__)
 
-#if !defined(__x86_64__) && !defined(__i386__)
-#  error "This code has only been tested on x86 platforms."
+#if !defined(__x86_64__) && !defined(__i386__) && !defined(__powerpc__)
+#  error "This code has only been tested on x86 and powerpc platforms."
 #include <including_a_nonexistent_file_will_stop_some_compilers_from_continuing_with_a_hopeless_task>
 { /* maybe an unbalanced brace will terminate the compilation */
  /* Feel free to try the Random123 library on other architectures by changing
@@ -70,17 +69,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif
 
 #ifndef R123_USE_CXX0X
-/* According to the C++0x standard, we should be able to test the numeric
-   value of __cplusplus == 199701L for C++98, __cplusplus == 201103L for C++0x
-   But gcc has had an open bug  http://gcc.gnu.org/bugzilla/show_bug.cgi?id=1773
-   since early 2001, which may finally be fixed in 4.7 (late 2011) */
-/* See the comments near r123m128i::r128m128i() = default in sse.h. for why
- we conditionalize CXX0X usage on GNU_VERSION */
-#if defined( __GXX_EXPERIMENTAL_CXX0X__ ) && GNU_VERSION >= 40600
-#define R123_USE_CXX0X 1
-#else
-#define R123_USE_CXX0X 0
-#endif
+#define R123_USE_CXX0X 1 // other requires C++11 now
 #endif
 
 #ifndef R123_USE_AES_NI
@@ -205,4 +194,3 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 /* If you add something, it must go in all the other XXfeatures.hpp
    and in ../ut_features.cpp */
-#endif

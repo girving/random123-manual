@@ -29,8 +29,7 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-#ifndef __sunprofeatures_dot_hpp
-#define __sunprofeatures_dot_hpp
+#pragma once
 
 #ifndef R123_STATIC_INLINE
 #define R123_STATIC_INLINE static inline
@@ -173,4 +172,3 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // If you add something, it must go in all the other XXfeatures.hpp
 // and in ../ut_features.cpp
-#endif

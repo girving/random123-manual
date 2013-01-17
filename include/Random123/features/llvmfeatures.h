@@ -29,11 +29,8 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-#ifndef __llvmfeatures_dot_hpp
-#define __llvmfeatures_dot_hpp
+#pragma once
 
 /* The gcc features seem to work, but this is a placeholder in case they don't. */
 
 #include "gccfeatures.h"
-
-#endif

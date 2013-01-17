@@ -29,8 +29,7 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-#ifndef __r123_nvcc_features_dot_h__
-#define __r123_nvcc_features_dot_h__
+#pragma once
 
 // nvcc falls through to gcc or msvc.  So first define
 // a couple of things and then include either gccfeatures.h
@@ -81,6 +80,4 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "gccfeatures.h"
 #elif defined(_MSC_FULL_VER)
 #include "msvcfeatures.h"
-#endif
-
 #endif
