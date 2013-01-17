@@ -35,7 +35,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "util_demangle.hpp"
 
 using namespace r123;
-int main(int argc, char **argv){
+int main(int, char **){
     r123array4x32 c = {{}};
     r123array4x32 r;
 

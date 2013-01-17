@@ -36,15 +36,15 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * Avoid much boilerplate in every OpenCL program
  */
 
+#include "util.h"
+
 #if defined(__APPLE__) || defined(__MACOSX)
 #include <OpenCL/cl.h>
+#include <OpenCL/cl_ext.h>
 #else
 #include <CL/cl.h>
+#include <CL/cl_ext.h>
 #endif
-
-#include "util_macros.h"
-
-extern int verbose;
 
 #define UCL_STRSIZE 128
 
@@ -60,6 +60,7 @@ typedef struct ucl_info {
     char vendor[UCL_STRSIZE], devname[UCL_STRSIZE],
 	version[UCL_STRSIZE], driver[UCL_STRSIZE];
     int computeflags;
+    cl_device_fp_config fpdbl;
 } UCLInfo;
 
 /* Miscellaneous checking macros for convenience */
@@ -130,24 +131,27 @@ static UCLInfo *opencl_init(const char *devstr, const char *src,
 {
 #define UCL_MAX_PROPERTIES 32
 #define UCL_MAX_PLATFORMS 8
-#define UCL_MAX_DEVICES 8
+#define UCL_MAX_DEVICES 16
     UCLInfo *tp;
     cl_context_properties ctxprop[UCL_MAX_PROPERTIES];
     cl_int err;
     cl_platform_id platforms[UCL_MAX_PLATFORMS];
     cl_uint nplatforms, ndevices;
     cl_device_id devices[UCL_MAX_DEVICES];
-    const char *srcstr[1];
-    int i, j, cores, devcores;
+    const char *srcstr[1], *clbinfile;
+    unsigned i, j;
+    int cores, devcores;
 
     /* get list of platforms */
+    CHECK(clGetPlatformIDs(0, NULL, &nplatforms));
+    dprintf(("nplatforms = %d\n", nplatforms));
     CHECK(clGetPlatformIDs(UCL_MAX_PLATFORMS, platforms, &nplatforms));
     if (nplatforms == 0) {
 	fprintf(stderr, "No OpenCL platforms available\n");
 	return NULL;
     }
     dprintf(("found %d platform%s:\n", nplatforms, nplatforms == 1 ? "" : "s"));
-    CHECKNOTZERO(tp = malloc(sizeof(UCLInfo)));
+    CHECKNOTZERO(tp = (UCLInfo *) malloc(sizeof(UCLInfo)));
     ctxprop[0] = CL_CONTEXT_PLATFORM;
     ctxprop[1] = 0; /* will fill in platform in loop */
     ctxprop[2] = 0;
@@ -175,32 +179,42 @@ static UCLInfo *opencl_init(const char *devstr, const char *src,
 				  sizeof uc.compunits, &uc.compunits, 0));
 	    CHECK(clGetDeviceInfo(devices[j], CL_DEVICE_MAX_WORK_GROUP_SIZE,
 				  sizeof uc.wgsize, &uc.wgsize, 0));
+	    CHECK(clGetDeviceInfo(devices[j], CL_DEVICE_DOUBLE_FP_CONFIG,
+				  sizeof uc.fpdbl, &uc.fpdbl, 0));
 	    uc.computeflags = 0;
 #ifdef CL_DEVICE_COMPUTE_CAPABILITY_MAJOR_NV
 	    {
 		cl_uint nvmaj, nvmin;
-		CHECK(clGetDeviceInfo(devices[j], CL_DEVICE_COMPUTE_CAPABILITY_MAJOR_NV,
-				      sizeof nvmaj, &nvmaj, 0));
-		CHECK(clGetDeviceInfo(devices[j], CL_DEVICE_COMPUTE_CAPABILITY_MINOR_NV
-				      sizeof nvmin, &nvmin, 0));
-		uc.computeflags = nvmaj*10 + nvmin;
+		if(clGetDeviceInfo(devices[j], CL_DEVICE_COMPUTE_CAPABILITY_MAJOR_NV,
+				   sizeof(nvmaj), &nvmaj, 0) == CL_SUCCESS &&
+		   clGetDeviceInfo(devices[j], CL_DEVICE_COMPUTE_CAPABILITY_MINOR_NV,
+				   sizeof(nvmin), &nvmin, 0) == CL_SUCCESS) {
+		    uc.computeflags = nvmaj*10 + nvmin;
+		}
 	    }
 #endif
 	    cores = uc.compunits;
 	    /* XXX Hardwired knowledge about devices */
-	    if (strcmp("Cayman", uc.devname) == 0) {
+	    if (strcmp("Cayman", uc.devname) == 0 || strcmp("Tahiti", uc.devname) == 0) {
 		/*
-		 * Each modern AMD compute unit (shader cluster?)
-		 * is a 16-lane SIMD Engine with 4 (Cayman) or 5
+		 * Most modern AMD compute units (shader cluster?)
+		 * are a 16-lane SIMD Engine with 4 (Cayman) or 5
 		 * (Cypress) VLIW slots per lane.  AMD appears to
 		 * think of each slot as a "stream processor"
 		 * (shader processor) in their marketing i.e. a
 		 * Cayman-based Radeon 6950 with 24 compute units
 		 * has 1536 stream processors.
+		 * With Tahiti/Southern Islands/GCN, each compute
+		 * unit has four vector execution SIMD units, each
+		 * with 16 lanes.  So the Tahiti-based Radeon 7970 with
+		 * 32 compute units has 2048 cores/stream processors.
 		 */
 		cores *= 16*4;
 	    } else if (strcmp("Cypress", uc.devname) == 0) {
 		cores *= 16*5;
+	    } else if (strstr(uc.devname, "GTX 680")) {
+		/* Kepler has 192 cores per SMX */
+		cores *= 192;
 	    } else if (strstr(uc.devname, "GTX 580") ||
 		       strstr(uc.devname, "GTX 480") ||
 		       strstr(uc.devname, "C20") ||
@@ -210,12 +224,14 @@ static UCLInfo *opencl_init(const char *devstr, const char *src,
 		 * computeflags to figure this out?
 		 */
 		cores *= 32;
+
 	    }
 	    /* clkfreq is in Megahertz! */
 	    uc.cycles = 1e6 * uc.clkfreq * cores;
-	    dprintf(("  %d: device 0x%lx vendor %s %s version %s driver %s : %u compute units @ %u MHz %d cores cycles/s %.2f flags %d\n",
+	    dprintf(("  %d: device 0x%lx vendor %s %s version %s driver %s : %u compute units @ %u MHz %d cores cycles/s %.2f flags %d fpdbl 0x%lx\n",
 		     j, (unsigned long) devices[j], uc.vendor, uc.devname, uc.version,
-		     uc.driver, uc.compunits, uc.clkfreq, cores, uc.cycles, uc.computeflags));
+		     uc.driver, uc.compunits, uc.clkfreq, cores, uc.cycles, uc.computeflags,
+		     (unsigned long) uc.fpdbl));
 	    if (devstr && strstr(uc.devname, devstr) == NULL) {
 		if (verbose || debug)
 		    printf("skipping device %s\n", uc.devname);
@@ -252,18 +268,51 @@ static UCLInfo *opencl_init(const char *devstr, const char *src,
      * complex API.
      */
     dprintf(("create OpenCL program from source\n"));
-    srcstr[0] = src;
-    CHECKERR(tp->prog = clCreateProgramWithSource(tp->ctx, 1, srcstr, 0, &err));
-    if (clBuildProgram(tp->prog, 1, &tp->devid, options, 0, 0) != CL_SUCCESS) {
+
+    /* If the device has support for double, enable it, might need it for u01.h */
+    i = 0;
+#define UCLDBL "\n\
+#ifdef cl_khr_fp64\n\
+#pragma OPENCL EXTENSION cl_khr_fp64 : enable\n\
+#elif defined(cl_amd_fp64)\n\
+#pragma OPENCL EXTENSION cl_amd_fp64 : enable\n\
+#endif\n\
+"
+    if (tp->fpdbl) {
+	srcstr[i++] = UCLDBL;
+    }
+    srcstr[i++] = src;
+    CHECKERR(tp->prog = clCreateProgramWithSource(tp->ctx, i, srcstr, 0, &err));
+    if ((err = clBuildProgram(tp->prog, 1, &tp->devid, options, 0, 0)) != CL_SUCCESS || debug) {
 	char errbuf[512*1024];
 	cl_int builderr = err;
 	CHECK(clGetProgramBuildInfo(tp->prog, tp->devid, CL_PROGRAM_BUILD_LOG,
 				    sizeof errbuf, &errbuf, 0));
 	if (errbuf[0]) {
-	    fprintf(stderr, "%s: OpenCL build for device id 0x%lx %s failed with error %d: %s\n",
+	    fprintf(stderr, "%s: OpenCL build for device id 0x%lx %s returned error %d: %s\n",
 		    progname, (unsigned long) tp->devid, tp->devname, builderr, errbuf);
 	}
-	exit(1);
+	if (builderr != CL_SUCCESS)
+	    exit(1);
+    }
+    if ((clbinfile = getenv("R123_SAVE_OPENCL_BINARY")) != NULL) {
+	size_t sz, szret;
+	unsigned char *binp;
+	FILE *fp;
+	CHECKERR(clGetProgramInfo(tp->prog, CL_PROGRAM_BINARY_SIZES, sizeof(sz), &sz, &szret));
+	CHECKNOTZERO(szret);
+	CHECKNOTZERO(sz);
+	printf("szret %lu, sz %lu\n", szret, (unsigned long) sz);
+	if (szret > 0 && sz > 0) {
+	    CHECKNOTZERO((binp = (unsigned char *) malloc(sz)));
+	    CHECKERR(clGetProgramInfo(tp->prog, CL_PROGRAM_BINARIES, sizeof(binp), &binp, &szret));
+	    CHECKNOTZERO(szret);
+	    CHECKNOTZERO(fp = fopen(clbinfile, "wc"));
+	    CHECKEQUAL(sz, fwrite(binp, 1, sz, fp));
+	    CHECKZERO(fclose(fp));
+	    free(binp);
+	    printf("wrote OpenCL binary to %s\n", clbinfile);
+	}
     }
     dprintf(("opencl_init done\n"));
     /* XXX Save build programs as .deviceid so we can read them back and run? */

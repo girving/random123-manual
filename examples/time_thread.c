@@ -35,13 +35,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * different permutations of RNGs and NxW and R.
  */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <errno.h>
-#include <sys/stat.h>
-#include "util_macros.h"
 #include "util.h"
+#include <sys/stat.h>
 
 #include "Random123/philox.h"
 #include "Random123/threefry.h"
@@ -77,6 +72,7 @@ R123_STATIC_INLINE int get_global_id(int x)
 {
     int i;
     pthread_t me = pthread_self();
+    (void)x; /* why is this an arg? */
     for (i = 0; i < thread_count; i++) {
 	if (thread_info[i].started && pthread_equal(me, thread_info[i].tid))
 	    return i;
@@ -91,7 +87,7 @@ R123_STATIC_INLINE int get_global_id(int x)
 #define TEST_TPL(NAME, N, W, R) \
 typedef struct { \
     uint kcount; \
-    NAME##N##x##W##_key_t key; \
+    NAME##N##x##W##_ukey_t ukey; \
     NAME##N##x##W##_ctr_t ctr; \
     NAME##N##x##W##_ctr_t *octrs; \
 } ThreadData_##NAME##N##x##W##_##R; \
@@ -110,7 +106,7 @@ void *thread_run_##NAME##N##x##W##_##R(void *p) \
     /* store our thread id for use by get_global_info */ \
     tip->tid = pthread_self(); \
     tip->started = 1; \
-    test_##NAME##N##x##W##_##R(tp->kcount, tp->key, tp->ctr, tp->octrs); \
+    test_##NAME##N##x##W##_##R(tp->kcount, tp->ukey, tp->ctr, tp->octrs); \
     return tp; \
 }\
 void NAME##N##x##W##_##R(NAME##N##x##W##_ukey_t ukey, NAME##N##x##W##_ctr_t ctr, NAME##N##x##W##_ctr_t kactr, uint count, CPUInfo *tp) \
@@ -124,9 +120,9 @@ void NAME##N##x##W##_##R(NAME##N##x##W##_ukey_t ukey, NAME##N##x##W##_ctr_t ctr,
     pthread_t me = pthread_self(); /* parent thread id */ \
     pthread_t *tids; /* array of child thread ids */ \
     void *vp; /* return from join */ \
-    CHECKNOTZERO(thread_info = malloc(sizeof(thread_info[0])*tp->ncores)); \
-    CHECKNOTZERO(tap = malloc(sizeof(tap[0])*tp->ncores)); \
-    CHECKNOTZERO(tids = malloc(sizeof(tids[0])*tp->ncores)); \
+    CHECKNOTZERO(thread_info = (ThreadInfo *) malloc(sizeof(thread_info[0])*tp->ncores)); \
+    CHECKNOTZERO(tap = (ThreadArg_##NAME##N##x##W##_##R *) malloc(sizeof(tap[0])*tp->ncores)); \
+    CHECKNOTZERO(tids = (pthread_t *) malloc(sizeof(tids[0])*tp->ncores)); \
     for (i = 0; i < tp->ncores; i++) { \
 	thread_info[i].started = 0; \
 	thread_info[i].tid = me; \
@@ -134,8 +130,8 @@ void NAME##N##x##W##_##R(NAME##N##x##W##_ukey_t ukey, NAME##N##x##W##_ctr_t ctr,
 	tap[i].tp = &td; \
     } \
     thread_count = tp->ncores; \
-    CHECKNOTZERO(td.octrs = malloc(sizeof(td.octrs[0])*tp->ncores)); \
-    td.key = NAME##N##x##W##keyinit(ukey); \
+    CHECKNOTZERO(td.octrs = (NAME##N##x##W##_ctr_t *) malloc(sizeof(td.octrs[0])*tp->ncores)); \
+    td.ukey = ukey; \
     td.ctr = ctr; \
     td.kcount = 0; \
     for (n = -2; n < niterations; n++) { \
@@ -199,7 +195,7 @@ void NAME##N##x##W##_##R(NAME##N##x##W##_ukey_t ukey, NAME##N##x##W##_ctr_t ctr,
 	fflush(stdout); \
     } \
     thread_count = 0; \
-    free((void *)thread_info); \
+    free((void *) thread_info); \
     thread_info = NULL; \
     free(td.octrs); \
     free(tap); \

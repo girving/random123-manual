@@ -37,28 +37,19 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #define R123_USE_AES_NI	0 /* never use this for OpenCL */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <errno.h>
-#include <unistd.h>
-#include "util_macros.h"
-#include "util.h"
+#include "util_opencl.h"
 
 #include "Random123/philox.h"
 #include "Random123/threefry.h"
 
-
 #include "time_misc.h"
 #include "util_print.h"
-#include "util_opencl.h"
 
 #define TEST_TPL(NAME, N, W, R) \
 void NAME##N##x##W##_##R(NAME##N##x##W##_ukey_t ukey, NAME##N##x##W##_ctr_t ctr, NAME##N##x##W##_ctr_t kactr, uint count, UCLInfo *tp) \
 { \
     const char *kernelname = PREFIX #NAME #N "x" #W "_" #R; \
     NAME##N##x##W##_ctr_t *hC; \
-    NAME##N##x##W##_key_t key; \
     int n, niterations = numtrials; /* we make niterations + 2 (warmup, overhead) calls to the kernel */ \
     int narg; \
     double cur_time; \
@@ -73,7 +64,7 @@ void NAME##N##x##W##_##R(NAME##N##x##W##_ukey_t ukey, NAME##N##x##W##_ctr_t ctr,
     const size_t nworkitems = tp->wgsize * tp->cores; \
     const size_t szC = nworkitems*sizeof(hC[0]); \
     /* allocate and initialize vector of counters in host memory */ \
-    CHECKNOTZERO(hC = malloc(szC)); \
+    CHECKNOTZERO(hC = (NAME##N##x##W##_ctr_t *) malloc(szC)); \
     for (i = 0; i < nworkitems; i++) { \
 	int xi; \
 	for (xi = 0; xi < N; xi++) \
@@ -125,13 +116,12 @@ void NAME##N##x##W##_##R(NAME##N##x##W##_ukey_t ukey, NAME##N##x##W##_ctr_t ctr,
 	    } \
 	    kcount = count + 1; \
 	} \
-	key = NAME##N##x##W##keyinit(ukey); \
 	(void)timer(&cur_time); \
 	dprintf(("setup arguments to kernel function %s\n", kernelname)); \
 	narg = 0; \
 	CHECK(clSetKernelArg(kern, narg, sizeof(kcount), (void *)&kcount)); \
 	narg++; \
-	CHECK(clSetKernelArg(kern, narg, sizeof(key), (void *)&key)); \
+	CHECK(clSetKernelArg(kern, narg, sizeof(ukey), (void *)&ukey)); \
 	narg++; \
 	CHECK(clSetKernelArg(kern, narg, sizeof(ctr), (void *)&ctr)); \
 	narg++; \
@@ -171,7 +161,7 @@ void NAME##N##x##W##_##R(NAME##N##x##W##_ukey_t ukey, NAME##N##x##W##_ctr_t ctr,
 
 int main(int argc, char **argv)
 {
-    char *cp;
+    const char *cp;
     uint count = 0;
     UCLInfo *infop;
     int keyctroffset = 0;

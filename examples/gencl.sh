@@ -8,8 +8,31 @@
 # Mark Moraes, D. E. Shaw Research
 
 # indenting the cpp output makes errors from the OpenCL runtime compiler
-# much more understandable.
-: ${GENCL_INDENT=indent}
+# much more understandable.  User can override with whatever they want.
+# The classic BSD indent (yes, the one that lived in /usr/ucb/indent once)
+# defaults to -br, but recent GNU indent versions do not.  Both appear to
+# accept -br, fortunately... (BSD indent does not accept -kr or -linux, alas)
+
+PATH=$PATH:/usr/bin
+export PATH
+if type indent > /dev/null 2>&1; then
+	: ${GENCL_INDENT="indent -br"}
+else
+	: ${GENCL_INDENT=cat}
+fi
+
+# We rely on gsub in awk, which exists in everything except classic
+# old V7 awk (Solaris!).  If we can find gawk or nawk, we prefer those.
+# http://www.shelldorado.com/articles/awkcompat.html
+for f in gawk nawk awk; do
+	if type "$f" > /dev/null 2>&1; then
+		: ${GENCL_AWK="$f"}
+		break
+	fi
+done
+case "${GENCL_AWK}" in
+'')	echo "$0: could not find awk!">&2; exit 1;;
+esac
 usage="Usage: $0 inputoclfilename outputfilename"
 case $# in
 2)	;;
@@ -20,13 +43,8 @@ case "$1" in
 $usage" >&2; exit 1;;
 esac
 set -e
-out="$2"
-echo 'const static char *opencl_src = "\n\' > "$out"
 ${CC-cc} -xc -E -P -nostdinc -D__OPENCL_VERSION__=1 $CPPFLAGS "$1" | 
-	if type "${GENCL_INDENT}" > /dev/null 2>&1; then
-		"${GENCL_INDENT}" -kr
-	else
-		cat
-	fi | 
-	sed -n -e'1,$s,\\,\\\\,g;s,",\\",g;s,$,\\n\\,;p' >> "$out"
-echo '";' >> "$out"
+	${GENCL_INDENT} | 
+	${GENCL_AWK} 'BEGIN {print "const static char *opencl_src = \"\\n\\"}
+	{gsub("\\", "\\\\", $0); gsub("\"", "\\\"", $0); print $0 "\\n\\"}
+	END {print "\";"}' > "$2"

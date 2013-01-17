@@ -46,7 +46,7 @@ using namespace std;
 using namespace r123;
 
 #if !R123_USE_SSE
-int main(int argc, char **argv){
+int main(int, char **){
     std::cout << "No SSE support.  This test is not compiled\n";
     return 0;
 }
@@ -54,13 +54,14 @@ int main(int argc, char **argv){
 
 #include "util_m128.h"
 
-int main(int argc, char **argv){
+int main(int, char **){
     r123array1xm128i IN, K;
 
     K.v[0].m =  m128i_from_charbuf("0001020304050607 08090a0b0c0d0e0f");
     IN.v[0].m = m128i_from_charbuf("0011223344556677 8899aabbccddeeff");
     // From FIPS-197, this is the official "right answer"
-    r123array1xm128i right_answer = {{{m128i_from_charbuf("69c4 e0d8 6a7b 0430 d8cd b780 70b4 c55a")}}};
+    r123array1xm128i right_answer;
+    right_answer[0] = m128i_from_charbuf("69c4 e0d8 6a7b 0430 d8cd b780 70b4 c55a");
     (void)right_answer;  /* don't complain about an unused variable if neither NI nor OPENSSL are enabled. */
 #if R123_USE_AES_NI
     if( haveAESNI() ){

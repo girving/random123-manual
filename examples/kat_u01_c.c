@@ -29,8 +29,16 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-#pragma once
+/* This is compiled by both C and C++ (included by kat_u01_cpp.cpp */
+#include "kat_u01_main.h"
 
-/* The gcc features seem to work, but this is a placeholder in case they don't. */
+#include "kat_u01_dev_execute.h"
 
-#include "gccfeatures.h"
+void host_execute_tests(uint64_t *tests, size_t ntests, KatU01Result *results)
+{
+    unsigned i;
+
+    for (i = 0; i < ntests; i++) {
+	dev_execute_tests(&tests[i], &results[i]);
+    }
+}

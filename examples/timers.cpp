@@ -29,7 +29,9 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-#include <Random123/features/compilerfeatures.h>
+
+#include "util.h"
+
 #include <Random123/philox.h>
 #include <Random123/threefry.h>
 #include <Random123/aes.h>
@@ -39,13 +41,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <string>
 #include <iostream>
 #include <sstream>
-#include <stdint.h>
 #include <cstring>
 #if R123_USE_X86INTRIN_H
 #include <x86intrin.h>
 #endif
 #include "util_demangle.hpp"
-#include "util.h"
 #include "util_cpu.h"
 
 using namespace r123;
@@ -179,7 +179,7 @@ template <typename B>
 void timer(){
     typedef typename B::ctr_type ctr_type;
     typedef typename ctr_type::value_type value_type;
-    ctr_type sum = {};
+    ctr_type sum = {{}};
     uint_fast64_t N = 1000000;    // First try only a few thousand...
     B b;
     int bytes_per_call = sizeof(ctr_type);

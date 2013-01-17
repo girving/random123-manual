@@ -77,6 +77,18 @@ inline uint32_t get32<r123m128i>(const r123m128i& t, size_t n){
 }
 #endif
 
+struct dummySeedSeq{
+    typedef uint32_t result_type;
+    template <typename ITER>
+    void generate(ITER b, ITER e){
+        uint32_t v = 0xdeadbeef;
+        for(; b!=e; ++b){
+            *b = v;
+            v += 0xbaddecaf;
+        }
+    }
+};
+
 template <typename AType>
 void doit(size_t N, size_t W){
     AType uninitialized;
@@ -174,16 +186,11 @@ void doit(size_t N, size_t W){
         assert(z[i] == one);
     }
 
-    // assemble
-    assert( aone.assembly_count() == N*((W+31)/32) );
-    vector<uint32_t> v32(aone.assembly_count());;
-    // Fill v32 with some non-zero values.
-    v32[0] = 0xdeadbeef;
-    for(size_t i=1; i<v32.size(); ++i){
-        v32[i] = 0xbaddecaf * v32[i-1];
-    }
-    // check that the result of assemble(v32) looks right.
-    aone.assemble(&v32[0]);
+    // seed
+    dummySeedSeq seedseq;
+    aone = atype::seed(seedseq);
+    vector<uint32_t> v32( N*((W+31)/32) );
+    seedseq.generate(v32.begin(), v32.end());
     size_t jj=0;
     uint32_t mask = 0xffffffff;
     if( W < 32 )
@@ -239,7 +246,7 @@ void doit(size_t N, size_t W){
 }
 
 
-int main(int argc, char **argv){
+int main(int, char **){
 #if R123_USE_SSE
     doit<r123array1xm128i>(1, 128);
 #endif

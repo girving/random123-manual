@@ -36,6 +36,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #if !R123_USE_SSE
 int main(int argc, char **argv){
+    (void)argc; (void)argv; /* unused */
     printf("No SSE support.  This test is not compiled\n");
     return 0;
 }
@@ -74,6 +75,7 @@ main(int argc, char **argv)
 #else
     printf("%s: no AES-NI compiled into this program\n", argv[0]);
 #endif
+    (void)argc; (void)argv; /* unused */
     return 0;
 }
 
