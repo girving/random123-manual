@@ -39,18 +39,18 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 extern int debug;
 extern const char *progname;
 
-#define CHECKNOTEQUAL(x, y)  if ((x) != (y)) ; else { \
+#define CHECKNOTEQUAL(x, y)  do { if ((x) != (y)) ; else { \
     fprintf(stderr, "%s: %s line %d error %s == %s (%s)\n", progname, __FILE__, __LINE__, #x, #y, strerror(errno)); \
     exit(1); \
-}
-#define CHECKEQUAL(x, y)  if ((x) == (y)) ; else { \
+} } while (0) 
+#define CHECKEQUAL(x, y)  do { if ((x) == (y)) ; else { \
     fprintf(stderr, "%s: %s line %d error %s != %s (%s)\n", progname, __FILE__, __LINE__, #x, #y, strerror(errno)); \
     exit(1); \
-}
+} } while (0)
 #define CHECKZERO(x)  CHECKEQUAL((x), 0)
 #define CHECKNOTZERO(x)  CHECKNOTEQUAL((x), 0)
 
-#define dprintf(x) if (debug < 1) ; else { printf x; fflush(stdout); }
+#define dprintf(x) do { if (debug < 1) ; else { printf x; fflush(stdout); } } while (0)
 
 #define ALLZEROS(x, K, N) \
 do { \

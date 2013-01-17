@@ -136,7 +136,7 @@ static double clockspeedHz(int *ncores, char  **modelnamep){
 #elif defined(__linux__)
 /* Read the clock speed from /proc/cpuinfo - Linux-specific! */
 static double clockspeedHz(int *ncores, char **modelnamep){
-    char *cpuinfo, *s;
+    char *cpuinfo, *s, *stmp;
     double Mhz = 0.;
     double xMhz;
     int i;
@@ -148,21 +148,28 @@ static double clockspeedHz(int *ncores, char **modelnamep){
     }
     if (ncores) *ncores = 0;
     if (modelnamep) {
-	CHECKNOTZERO(s = strstr(cpuinfo, "model name"));
-	CHECKNOTZERO(s = strchr(s, ':'));
-	while (*++s == ' ')
-	    ;
-	i = strchr(s, '\n') - s;
-	*modelnamep = (char *)malloc(i + 1);
-	memcpy(*modelnamep, s, i);
-	(*modelnamep)[i] = '\0';
-	dprintf(("raw modelname is %d bytes: %s\n", i, *modelnamep));
-	nameclean(*modelnamep);
-	dprintf(("cleaned modelname is %s\n", *modelnamep));
+	s = strstr(cpuinfo, "model name");
+	if (s) {
+	    CHECKNOTZERO(s = strchr(s, ':'));
+	    while (*++s == ' ')
+		;
+	    i = strchr(s, '\n') - s;
+	    *modelnamep = (char *)malloc(i + 1);
+	    memcpy(*modelnamep, s, i);
+	    (*modelnamep)[i] = '\0';
+	    dprintf(("raw modelname is %d bytes: %s\n", i, *modelnamep));
+	    nameclean(*modelnamep);
+	    dprintf(("cleaned modelname is %s\n", *modelnamep));
+	} else
+	    dprintf(("unknown modelname"));
     }
     s = cpuinfo;
-    while ((s = strstr(s, "cpu MHz")) != NULL) {
-	CHECKNOTZERO(sscanf(s, "cpu MHz : %lf %n", &xMhz, &i));
+    while ((stmp = strstr(s, "cpu MHz")) || ((stmp = strstr(s, "clock")))) {
+	s = stmp;
+	if (s[1] == 'p') // cpu MHz
+	    CHECKNOTZERO(sscanf(s, "cpu MHz : %lf %n", &xMhz, &i));
+	else
+	    CHECKNOTZERO(sscanf(s, "clock : %lfMHz %n", &xMhz, &i));
 	dprintf(("parsed %f %d\n", xMhz, i));
 	if (xMhz > Mhz) Mhz = xMhz;
 	s += i;
