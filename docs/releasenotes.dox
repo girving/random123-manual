@@ -1,0 +1,25 @@
+/**
+@page "Release Notes"
+
+<dl>
+<dt>1.02 - Nov 21, 2011</dt><dd>
+<ul>
+<li>
+<b> BUG FIXED </b> in threefry2xW_R(R<20, ...).  Earlier implementations of
+threefry2x32_R and threfry2x64_R produced incorrect
+results when called with the number of rounds less than 20.
+The bug caused extra work to be done in every call, possibly resulting in <i>more</i>
+mixing than the correct implementation delivers.  Both old (buggy, more mixing) and new (bug-fixed, less mixing)
+implementations have been rechecked and are fully "Crush-Resistant". </li>
+<li>worked around problems with argument marshalling in version 2.4 of the AMDAPPSDK OpenCL implementation</li>
+</ul>
+</dd>
+<dt>1.01 - Nov 11, 2011</dt><dd>
+<ul>
+<li>allow the user to define __STDC_CONSTANT_MACROS</li>
+<li>allow r123arrayNxW::incr(larger_than_largest_value_type)</li>
+</ul>
+<dt>1.00 - Sep 26, 2011</dt><dd>Initial release</dd>
+</dl>
+
+*/
