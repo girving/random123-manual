@@ -281,7 +281,7 @@ enum { philox##N##x##W##_rounds = PHILOX##N##x##W##_DEFAULT_ROUNDS }; \
 typedef struct r123array##N##x##W philox##N##x##W##_ctr_t;                  \
 typedef struct r123array##Nhalf##x##W philox##N##x##W##_key_t;              \
 typedef struct r123array##Nhalf##x##W philox##N##x##W##_ukey_t;              \
-R123_STATIC_INLINE philox##N##x##W##_key_t philox##N##x##W##keyinit(philox##N##x##W##_ukey_t uk) { return uk; } \
+R123_CUDA_DEVICE R123_STATIC_INLINE philox##N##x##W##_key_t philox##N##x##W##keyinit(philox##N##x##W##_ukey_t uk) { return uk; } \
 R123_CUDA_DEVICE R123_STATIC_INLINE R123_FORCE_INLINE(philox##N##x##W##_ctr_t philox##N##x##W##_R(unsigned int R, philox##N##x##W##_ctr_t ctr, philox##N##x##W##_key_t key)); \
 R123_CUDA_DEVICE R123_STATIC_INLINE philox##N##x##W##_ctr_t philox##N##x##W##_R(unsigned int R, philox##N##x##W##_ctr_t ctr, philox##N##x##W##_key_t key) { \
     R123_ASSERT(R<=16);                                                 \
@@ -381,8 +381,8 @@ exports the member functions, typedefs and operator overloads required by a @ref
 The template argument, ROUNDS, is the number of times the Philox round
 function will be applied.
 
-As of September 2011, the authors know of no statistical flaws with
-ROUNDS=7 or more for Philox2x32.
+As of November 2011, the authors know of no statistical flaws with
+ROUNDS=6 or more for Philox2x32.
 
 @typedef r123::Philox2x32
 @ingroup PhiloxNxW
@@ -421,8 +421,11 @@ exports the member functions, typedefs and operator overloads required by a @ref
 The template argument, ROUNDS, is the number of times the Philox round
 function will be applied.
 
-As of September 2011, the authors know of no statistical flaws with
-ROUNDS=7 or more for Philox4x32.
+In November 2011, the authors recorded some suspicious p-values (approximately 1.e-7) from
+some very long (longer than the default BigCrush length) SimpPoker tests.  Despite
+the fact that even longer tests reverted to "passing" p-values, a cloud remains over
+Philox4x32 with 7 rounds.  The authors know of no statistical flaws with
+ROUNDS=8 or more for Philox4x32.
 
 @typedef r123::Philox4x32
 @ingroup PhiloxNxW

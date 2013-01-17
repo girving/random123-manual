@@ -18,15 +18,15 @@ meta_targets:=kat core aesni timing c cpp gsl thread cuda opencl
 # (specifically, the gsl-config program in the PATH), thread requires POSIX threads,
 # CUDA requires NVIDIA CUDA 3.x or newer, OpenCL requires OpenCL includes & libraries
 # (e.g. AMD APP SDK, NVIDIA SDK)
-c:=katc pi_capi simple ut_ars time_serial
-cpp:=katpp pi_cppapi simplepp ut_carray ut_M128 ut_features ut_ReinterpretCtr ut_Engine ut_aes pi_aes timers pi_microurng
+c:=kat_c pi_capi simple ut_ars time_serial
+cpp:=kat_cpp pi_cppapi simplepp ut_carray ut_M128 ut_features ut_ReinterpretCtr ut_Engine ut_aes pi_aes timers pi_microurng
 gsl:=pi_gsl ut_gsl
 thread:=time_thread
-cuda:=pi_cuda pi_cudapp time_cuda
-opencl:=pi_opencl time_opencl
+cuda:=pi_cuda pi_cudapp time_cuda kat_cuda
+opencl:=pi_opencl time_opencl kat_opencl
 
 # Convenience metatargets: these are to help developers test functional subsets across platforms
-kat:=katc katpp
+kat:=kat_c kat_cpp
 core:=$(c) $(cpp)
 aesni:=pi_aes ut_aes ut_ars
 timing:=timers time_serial time_thread

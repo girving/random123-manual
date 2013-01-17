@@ -40,6 +40,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <algorithm>
 #include <vector>
 #include <stdint.h>
+#if R123_USE_CXX0X
+#include <type_traits>
+#endif
 
 namespace r123{
 /**
@@ -55,7 +58,7 @@ namespace r123{
 
   The MicroURNG template in MicroURNG.hpp
   provides the more limited functionality of a C++0x "Uniform
-  Random Number Generator", but leaves the application in  control
+  Random Number Generator", but leaves the application in control
   of counters and keys and hence may be preferable to the Engine template.
   For example, a MicroURNG allows one to use C++0x "Random Number
   Distributions"  without giving up control over the counters
@@ -85,39 +88,57 @@ protected:
 	}
     }        
 public:
-    Engine() : b(), c(), elem() {
+    explicit Engine() : b(), c(), elem() {
 	ukey_type x = {{}};
 	ukey = x;
         key = ukey;
     }
-    Engine(result_type r) : b(), c(), elem() {
-        std:: vector<uint32_t> ss(ukey.assembly_count());
-        R123_ULONG_LONG rll = r;
-        for(size_t i=0; rll && (i<ss.size()); ++i){
-            ss[i] = uint32_t(rll);
-            rll >>= 16; rll >>= 16; // dont warn, even if long long has only 32 bits.
-        }        
-        ukey.assemble(&ss[0]);
+    explicit Engine(result_type r) : b(), c(), elem() {
+        ukey_type x = {{typename ukey_type::value_type(r)}};
+        ukey = x;
         key = ukey;
     }
-    // Should one jump through template meta-programming hoops
-    // here to force the compiler to resolve integral promotions
-    // in favor of the result_type constructor rather than the
-    // templated SeedSeq constructor??
-    template <typename SeedSeq>
-    Engine(SeedSeq s) : b(), c(), elem() {
-        std::vector<uint32_t> ss(ukey.assembly_count());
-        s.generate(ss.begin(), ss.end());
-        ukey.assemble(&ss[0]);
+    // 26.5.3 says that the SeedSeq templates shouldn't particpate in
+    // overload resolution unless the type qualifies as a SeedSeq.
+    // How that is determined is unspecified, except that "as a
+    // minimum a type shall not qualify as a SeedSeq if it is
+    // implicitly convertible to a result_type."  
+    //
+    // First, we make sure that even the non-const copy constructor
+    // works as expected.  In addition, if we've got C++0x
+    // type_traits, we use enable_if and is_convertible to implement
+    // the convertible-to-result_type restriction.  Otherwise, the
+    // template is unconditional and will match in some surpirsing
+    // and undesirable situations.
+    Engine(Engine& e) : b(e.b), ukey(e.ukey), c(e.c), elem(e.elem){
         key = ukey;
+        fix_invariant();
+    }
+    Engine(const Engine& e) : b(e.b), ukey(e.ukey), c(e.c), elem(e.elem){
+        key = ukey;
+        fix_invariant();
     }
 
     template <typename SeedSeq>
-    void seed(SeedSeq s){ 
-        *this = Engine(s);
+    explicit Engine(SeedSeq &s
+#if R123_USE_CXX0X
+                    , typename std::enable_if<!std::is_convertible<SeedSeq, result_type>::value>::type* dummy=0
+#endif
+                    )
+        : b(), c(), elem() {
+        ukey = ukey_type::seed(s);
+        key = ukey;
     }
     void seed(result_type r){
         *this = Engine(r);
+    }
+    template <typename SeedSeq>
+    void seed(SeedSeq &s
+#if R123_USE_CXX0X
+                    , typename std::enable_if<!std::is_convertible<SeedSeq, result_type>::value>::type* dummy=0
+#endif
+              ){ 
+        *this = Engine(s);
     }
     void seed(){
         *this = Engine();
@@ -171,10 +192,16 @@ public:
     // Some bonus methods, not required for a Random Number
     // Engine
 
-    // A constructor and seed() method for key_type seem useful
-    // They're no more ambiguous than the templates over SeedSeq :-(.
-    Engine(const key_type& k) : key(k), c(), elem(){
-    }
+    // Constructors and seed() method for ukey_type seem useful
+    // We need const and non-const to supersede the SeedSeq template.
+    explicit Engine(const ukey_type &uk) : key(uk), ukey(uk), c(), elem(){}
+    explicit Engine(ukey_type &uk) : key(uk), ukey(uk), c(), elem(){}
+    void seed(const ukey_type& uk){
+        *this = Engine(uk);
+    }        
+    void seed(ukey_type& uk){
+        *this = Engine(uk);
+    }        
 
     // Forward the e(counter) to the CBRNG we are templated
     // on, using the current value of the key.
@@ -182,15 +209,8 @@ public:
         return b(c, key);
     }
 
-    // allow it to be seeded with a ukey_type.
-    void seed(const ukey_type& _k){
-        ukey = _k;
-        key = _k;
-        fix_invariant();
-    }        
-
-    // Since you can seed *this with a key_type, it seems reasonable
-    // to allow the caller to know what seed *this is using.
+    // Since you can seed *this with a ukey_type, it seems reasonable
+    // to allow the caller to know what seed/ukey *this is using.
     ukey_type getseed() const{
         return ukey;
     }

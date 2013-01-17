@@ -58,7 +58,6 @@ void NAME##N##x##W##_##R(NAME##N##x##W##_ukey_t ukey, NAME##N##x##W##_ctr_t ctr,
 { \
     const char *kernelname = PREFIX #NAME #N "x" #W "_" #R; \
     NAME##N##x##W##_ctr_t *hC; \
-    NAME##N##x##W##_key_t key; \
     int n, niterations = numtrials; /* we make niterations + 2 (warmup, overhead) calls to the kernel */ \
     int narg; \
     double cur_time; \
@@ -125,13 +124,12 @@ void NAME##N##x##W##_##R(NAME##N##x##W##_ukey_t ukey, NAME##N##x##W##_ctr_t ctr,
 	    } \
 	    kcount = count + 1; \
 	} \
-	key = NAME##N##x##W##keyinit(ukey); \
 	(void)timer(&cur_time); \
 	dprintf(("setup arguments to kernel function %s\n", kernelname)); \
 	narg = 0; \
 	CHECK(clSetKernelArg(kern, narg, sizeof(kcount), (void *)&kcount)); \
 	narg++; \
-	CHECK(clSetKernelArg(kern, narg, sizeof(key), (void *)&key)); \
+	CHECK(clSetKernelArg(kern, narg, sizeof(ukey), (void *)&ukey)); \
 	narg++; \
 	CHECK(clSetKernelArg(kern, narg, sizeof(ctr), (void *)&ctr)); \
 	narg++; \

@@ -42,6 +42,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <CL/cl.h>
 #endif
 
+#include "util.h"
 #include "util_macros.h"
 
 extern int verbose;

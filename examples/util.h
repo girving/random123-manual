@@ -29,12 +29,11 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-#ifndef UTIL_H___
+#ifndef UTIL_H__
 #define UTIL_H__
 #include <string.h>
 #include <Random123/features/compilerfeatures.h>
 
-/* returns difference between current time and *d, also updates *d with current time. */
 #if defined(_MSC_VER)
 #include <Windows.h>
 R123_STATIC_INLINE double now(){
@@ -53,6 +52,7 @@ R123_STATIC_INLINE double now(){
 }
 #endif // _MSC_VER
 
+/* timer returns difference between current time and *d, also updates *d with current time. */
 R123_STATIC_INLINE double timer(double *d) {
     double dold = *d;
     *d = now();

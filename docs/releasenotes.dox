@@ -1,7 +1,33 @@
 /**
 @page "Release Notes"
-
 <dl>
+<dt>1.04 - Dec 5, 2011</dt><dd>
+<ul><li>
+new kat_vectors - there are now three tests for each tested generator: gen(ctr=0, key=0), gen(ctr=fff, key=0xfff),
+    and gen(ctr=digits-of-pi, key=more-digits-of-pi).  There are fewer tests overall, but they provide
+    better coverage, especially of non-zero keys.</li>
+</ul>
+</dd>
+
+<dt>1.03 - Nov 30, 2011</dt><dd>
+<ul>
+<li> overhaul known answer tests (kat)
+   <ul>
+   <li> common source for serial C, C++, cuda and opencl replaces katc and katpp </li>
+   <li> add missing kat_vectors for threefry2x32 </li>
+   </ul></li>
+<li> make keyinit functions device/kernel functions in CUDA/OpenCL </li>
+<li> replace r123array::assemble methods with r123array::seed(SeedSeq) template </li>
+<li> cleanup of signatures of Engine and MicroURNG methods: 
+   <ul>
+      <li> Engine(ukey_type&) and MicroURNG(ctr_type, ukey_type) constructors.</li>
+      <li> Engine(SeedSeq&) takes a reference argument, and, when C++0x &lt;type_traits&gt;
+           are available the SeedSeq templates don't participate in "surprising" overloads. </li>
+   </ul>
+</li>
+</ul>
+</dd>
+
 <dt>1.02 - Nov 21, 2011</dt><dd>
 <ul>
 <li>
@@ -14,12 +40,13 @@ implementations have been rechecked and are fully "Crush-Resistant". </li>
 <li>worked around problems with argument marshalling in version 2.4 of the AMDAPPSDK OpenCL implementation</li>
 </ul>
 </dd>
+
 <dt>1.01 - Nov 11, 2011</dt><dd>
 <ul>
 <li>allow the user to define __STDC_CONSTANT_MACROS</li>
 <li>allow r123arrayNxW::incr(larger_than_largest_value_type)</li>
 </ul>
+
 <dt>1.00 - Sep 26, 2011</dt><dd>Initial release</dd>
 </dl>
-
 */

@@ -89,6 +89,7 @@ public:
     static const unsigned BITS = _BITS;
     typedef typename cbrng_type::ctr_type ctr_type;
     typedef typename cbrng_type::key_type key_type;
+    typedef typename cbrng_type::ukey_type ukey_type;
     typedef typename ctr_type::value_type result_type;
 
     result_type operator()(){
@@ -105,10 +106,10 @@ public:
         }
         return rdata[--last_elem];
     }
-    MicroURNG(cbrng_type _b, ctr_type _c0, key_type _k) : b(_b), c0(_c0), k(_k), n(0), last_elem(0) {
+    MicroURNG(cbrng_type _b, ctr_type _c0, ukey_type _uk) : b(_b), c0(_c0), k(_uk), n(0), last_elem(0) {
         chkhighbits();
     }
-    MicroURNG(ctr_type _c0, key_type _k) : b(), c0(_c0), k(_k), n(0), last_elem(0) {
+    MicroURNG(ctr_type _c0, ukey_type _uk) : b(), c0(_c0), k(_uk), n(0), last_elem(0) {
         chkhighbits();
     }
     result_type min() const{
@@ -119,11 +120,10 @@ public:
     }
     // extra methods:
     const ctr_type& counter() const{ return c0; }
-    const key_type& key() const{ return k; }
-    void reset(ctr_type _c0, key_type _k){
+    void reset(ctr_type _c0, ukey_type _uk){
         c0 = _c0;
         chkhighbits();
-        k = _k;
+        k = _uk;
         n = 0;
         last_elem = 0;
     }

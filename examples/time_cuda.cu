@@ -58,7 +58,6 @@ void NAME##N##x##W##_##R(NAME##N##x##W##_ukey_t ukey, NAME##N##x##W##_ctr_t ctr,
 { \
     const char *kernelname = PREFIX #NAME #N "x" #W "_" #R; \
     NAME##N##x##W##_ctr_t *hC, *dC; \
-    NAME##N##x##W##_key_t key; \
     int n, niterations = numtrials; /* we make niterations + 2 (warmup, overhead) calls to the kernel */ \
     double cur_time; \
     size_t i; \
@@ -119,9 +118,8 @@ void NAME##N##x##W##_##R(NAME##N##x##W##_ukey_t ukey, NAME##N##x##W##_ctr_t ctr,
 	    kcount = count + 1; \
 	} \
 	dprintf(("launch %s\n", kernelname)); \
-	key = NAME##N##x##W##keyinit(ukey); \
 	(void)timer(&cur_time); \
-	test_##NAME##N##x##W##_##R<<<tp->blocks_per_grid, tp->threads_per_block>>>(kcount, key, ctr, dC); \
+	test_##NAME##N##x##W##_##R<<<tp->blocks_per_grid, tp->threads_per_block>>>(kcount, ukey, ctr, dC); \
 	dprintf(("synchronize\n")); \
 	CHECKCALL(cudaThreadSynchronize()); \
 	dprintf(("copy results back from device to host\n")); \

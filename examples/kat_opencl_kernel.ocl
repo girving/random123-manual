@@ -1,0 +1,7 @@
+#include "kat.h"
+
+#define KAT_KERNEL __kernel
+#define KAT_GLOBAL __global
+#define KAT_UINT uint
+
+#include "kat_dev_execute.c"

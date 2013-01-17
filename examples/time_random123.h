@@ -84,12 +84,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
    overhead.
 */
 #define TEST_TPL(NAME, N, W, R)                                         \
-KERNEL void test_##NAME##N##x##W##_##R(uint64_t n64, NAME##N##x##W##_key_t k, NAME##N##x##W##_ctr_t ctrinit, MEMTYPE NAME##N##x##W##_ctr_t *ctr) \
+KERNEL void test_##NAME##N##x##W##_##R(uint64_t n64, NAME##N##x##W##_ukey_t uk, NAME##N##x##W##_ctr_t ctrinit, MEMTYPE NAME##N##x##W##_ctr_t *ctr) \
 {                                                                       \
     uint n = (uint)n64;                                                 \
     unsigned tid = get_global_id(0);                                    \
     uint i;                                                             \
     NAME##N##x##W##_ctr_t c, v={{0}};                                   \
+    NAME##N##x##W##_key_t k=NAME##N##x##W##keyinit(uk);                 \
     c = ctrinit;                                                        \
     if( R == NAME##N##x##W##_rounds ){                                  \
         for (i = 0; i < n; ++i) {                                       \

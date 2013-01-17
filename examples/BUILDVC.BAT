@@ -38,7 +38,7 @@ set CC=cl
 echo Building for %BUILDVC% with %CC% %CFLAGS%
 
 :Loop
-set BUILDFILES= ( katc.c katpp.cpp pi_aes.cpp pi_capi.c pi_cppapi.cpp pi_microurng.cpp simple.c simplepp.cpp time_serial.c timers.cpp ut_Engine.cpp ut_M128.cpp ut_ReinterpretCtr.cpp ut_aes.cpp ut_ars.c ut_carray.cpp ut_features.cpp )
+set BUILDFILES= ( kat_c.c kat_cpp.cpp pi_aes.cpp pi_capi.c pi_cppapi.cpp pi_microurng.cpp simple.c simplepp.cpp time_serial.c timers.cpp ut_Engine.cpp ut_M128.cpp ut_ReinterpretCtr.cpp ut_aes.cpp ut_ars.c ut_carray.cpp ut_features.cpp )
 FOR %%A IN %BUILDFILES% DO (
 	%CC% %CFLAGS% %%A
 	if errorlevel 1 exit /b 1

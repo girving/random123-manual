@@ -1,5 +1,8 @@
-cc -O -I../include   katc.c   -o katc
-g++ -O -I../include   katpp.cpp   -o katpp
+cc -O -I../include   kat_c.c   -o kat_c
+g++ -O -I../include   kat_cpp.cpp   -o kat_cpp
+nvcc -O -I../include   kat_cuda.cu   -o kat_cuda
+CC="cc" CPPFLAGS="-I../include" ./gencl.sh kat_opencl_kernel.ocl kat_opencl_kernel.i
+cc -O -I. -I../include   kat_opencl.c  -lOpenCL -o kat_opencl
 g++ -O -I../include   pi_aes.cpp   -o pi_aes
 cc -O -I../include   pi_capi.c   -o pi_capi
 g++ -O -I../include   pi_cppapi.cpp   -o pi_cppapi

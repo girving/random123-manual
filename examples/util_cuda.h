@@ -35,6 +35,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <cuda.h>
 #include <cuda_runtime_api.h>
 
+#include "util.h"
 #include "util_macros.h"
 
 // utility macros to check return codes and complain/exit on failure

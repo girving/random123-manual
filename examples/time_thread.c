@@ -91,7 +91,7 @@ R123_STATIC_INLINE int get_global_id(int x)
 #define TEST_TPL(NAME, N, W, R) \
 typedef struct { \
     uint kcount; \
-    NAME##N##x##W##_key_t key; \
+    NAME##N##x##W##_ukey_t ukey; \
     NAME##N##x##W##_ctr_t ctr; \
     NAME##N##x##W##_ctr_t *octrs; \
 } ThreadData_##NAME##N##x##W##_##R; \
@@ -110,7 +110,7 @@ void *thread_run_##NAME##N##x##W##_##R(void *p) \
     /* store our thread id for use by get_global_info */ \
     tip->tid = pthread_self(); \
     tip->started = 1; \
-    test_##NAME##N##x##W##_##R(tp->kcount, tp->key, tp->ctr, tp->octrs); \
+    test_##NAME##N##x##W##_##R(tp->kcount, tp->ukey, tp->ctr, tp->octrs); \
     return tp; \
 }\
 void NAME##N##x##W##_##R(NAME##N##x##W##_ukey_t ukey, NAME##N##x##W##_ctr_t ctr, NAME##N##x##W##_ctr_t kactr, uint count, CPUInfo *tp) \
@@ -135,7 +135,7 @@ void NAME##N##x##W##_##R(NAME##N##x##W##_ukey_t ukey, NAME##N##x##W##_ctr_t ctr,
     } \
     thread_count = tp->ncores; \
     CHECKNOTZERO(td.octrs = malloc(sizeof(td.octrs[0])*tp->ncores)); \
-    td.key = NAME##N##x##W##keyinit(ukey); \
+    td.ukey = ukey; \
     td.ctr = ctr; \
     td.kcount = 0; \
     for (n = -2; n < niterations; n++) { \

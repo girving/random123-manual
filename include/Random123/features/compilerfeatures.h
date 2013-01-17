@@ -212,9 +212,10 @@ added to each of the *features.h files, AND to examples/ut_features.cpp.
 
 #ifndef R123_ULONG_LONG
 #if defined(__cplusplus) && !R123_USE_CXX0X
-/* C++98 doesn't have long long, so fall back to uint64_t which
-   might be typedefed to something that doesn't elicit
-   complaints from -pedantic.  Cross your fingers... */
+/* C++98 doesn't have long long.  It doesn't have uint64_t either, but
+   we will have typedef'ed uint64_t to something in the xxxfeatures.h.
+   With luck, it won't elicit complaints from -pedantic.  Cross your
+   fingers... */
 #define R123_ULONG_LONG uint64_t
 #else
 #define R123_ULONG_LONG unsigned long long

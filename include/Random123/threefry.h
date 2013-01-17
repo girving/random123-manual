@@ -191,7 +191,7 @@ R123_CUDA_DEVICE R123_STATIC_INLINE uint32_t RotL_32(uint32_t x, unsigned int N)
 typedef struct r123array2x##W threefry2x##W##_ctr_t;                          \
 typedef struct r123array2x##W threefry2x##W##_key_t;                          \
 typedef struct r123array2x##W threefry2x##W##_ukey_t;                          \
-R123_STATIC_INLINE threefry2x##W##_key_t threefry2x##W##keyinit(threefry2x##W##_ukey_t uk) { return uk; } \
+R123_CUDA_DEVICE R123_STATIC_INLINE threefry2x##W##_key_t threefry2x##W##keyinit(threefry2x##W##_ukey_t uk) { return uk; } \
 R123_CUDA_DEVICE R123_STATIC_INLINE R123_FORCE_INLINE(threefry2x##W##_ctr_t threefry2x##W##_R(unsigned int Nrounds, threefry2x##W##_ctr_t in, threefry2x##W##_key_t k)); \
 R123_CUDA_DEVICE R123_STATIC_INLINE                                          \
 threefry2x##W##_ctr_t threefry2x##W##_R(unsigned int Nrounds, threefry2x##W##_ctr_t in, threefry2x##W##_key_t k){ \
@@ -297,7 +297,7 @@ threefry2x##W##_ctr_t threefry2x##W(threefry2x##W##_ctr_t in, threefry2x##W##_ke
 typedef struct r123array4x##W threefry4x##W##_ctr_t;                        \
 typedef struct r123array4x##W threefry4x##W##_key_t;                        \
 typedef struct r123array4x##W threefry4x##W##_ukey_t;                        \
-R123_STATIC_INLINE threefry4x##W##_key_t threefry4x##W##keyinit(threefry4x##W##_ukey_t uk) { return uk; } \
+R123_CUDA_DEVICE R123_STATIC_INLINE threefry4x##W##_key_t threefry4x##W##keyinit(threefry4x##W##_ukey_t uk) { return uk; } \
 R123_CUDA_DEVICE R123_STATIC_INLINE R123_FORCE_INLINE(threefry4x##W##_ctr_t threefry4x##W##_R(unsigned int Nrounds, threefry4x##W##_ctr_t in, threefry4x##W##_key_t k)); \
 R123_CUDA_DEVICE R123_STATIC_INLINE                                          \
 threefry4x##W##_ctr_t threefry4x##W##_R(unsigned int Nrounds, threefry4x##W##_ctr_t in, threefry4x##W##_key_t k){ \
@@ -803,8 +803,13 @@ exports the member functions, typedefs and operator overloads required by a @ref
 The template argument, ROUNDS, is the number of times the Threefry round
 function will be applied.
 
-As of September 2011, the authors know of no statistical flaws with
-ROUNDS=13 or more for Threefry2x64.
+In November 2011, the authors discovered that 13 rounds of
+Threefry2x64 sequenced by strided, interleaved key and counter
+increments failed a very long (longer than the default BigCrush
+length) WeightDistrub test.  At the same time, it was confirmed that
+14 rounds passes much longer tests (up to 5x10^12 samples) of a
+similar nature.  The authors know of no statistical flaws with
+ROUNDS=14 or more for Threefry2x64.
 
 @typedef r123::Threefry2x64
 @ingroup ThreefryNxW

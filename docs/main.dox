@@ -151,7 +151,10 @@ the fixed-size array member \c v.
 All relevant functions in the C and C++ APIs for Random123 are declared
 as CUDA device functions if they are included in a CUDA kernel source file
 and compiled with a CUDA compiler (nvcc).  They can be used exactly
-as described/documented for regular C or C++ programs. 
+as described/documented for regular C or C++ programs.  Note that
+CUDA device functions and host functions share the same namespace, so
+it is not currently possible to use Random123 functions in 
+both the host portion and the device portion of the same .cu source file.
 The Nx32 forms are faster than the Nx64 variants on current (2011)
 32-bit GPU architectures.
 

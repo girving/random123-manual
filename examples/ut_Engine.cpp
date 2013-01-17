@@ -31,6 +31,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 // TODO - really do a thorough and complete set of tests.
 
+#ifdef _MSC_FULL_VER
+// Engines have multiple copy constructors, quite legal C++, disable MSVC complaint
+#pragma warning (disable : 4521)
+#endif
+
 #include <Random123/philox.h>
 #include <Random123/aes.h>
 #include <Random123/threefry.h>
@@ -69,6 +74,14 @@ template <> uint8_t  kat1000<Engine<AESOpenSSL16x8> >(){ return 0237; }
 #endif
 
 #define ASSERTEQ(A, B) assert(A==B); assert(A()==B()); assert(A()==B()); assert(A()==B())
+
+struct DummySeedSeq{
+    template <typename ITER>
+    void generate(ITER b, ITER e){
+        std::fill(b, e, 1);
+    }
+};
+
 template <typename EType>
 void doit(){
     EType e;
@@ -78,6 +91,10 @@ void doit(){
     typedef typename BType::ctr_type ctype;
     typedef typename BType::key_type ktype;
     typedef typename BType::ukey_type uktype;
+
+    DummySeedSeq dummyss;
+    EType ess(dummyss);
+    assert(ess != e);
 
     rtype r1 = e();
     rtype r2 = e(); assert( r1 != r2 );
@@ -122,7 +139,17 @@ void doit(){
     ostringstream oss;
     oss << e2;
     string s2 = oss.str();
-    EType e3(rtype(55));
+    int fiftyfive = 55;
+#if R123_USE_CXX0X
+    // With CXX0X, the library has type_traits to prevent
+    // undesirable type resolution against the templated SeedSeq constructor
+    EType e3(fiftyfive);
+#else
+    // Without CXX0X, we have to be careful to pass in
+    // a bona fide rtype, and not just something that will promote
+    // to an rtype, if we want the rtype constructor.
+    EType e3((rtype(fiftyfive)));
+#endif
     EType esave(e);
     assert(e3 != e2);
     {
