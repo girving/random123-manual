@@ -45,12 +45,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <Random123/philox.h>
 #include <Random123/MicroURNG.hpp>
 #include <Random123/ReinterpretCtr.hpp>
-#if R123_USE_STD_RANDOM
+#if R123_USE_CXX11_RANDOM
 #include <random>
 #endif
 #include <iostream>
 #include <iomanip>
-#include <stdint.h>
 #include "pi_check.h"
 
 using namespace r123;
@@ -59,7 +58,7 @@ int main(int, char**){
     typedef Philox4x32 RNG;
     RNG::ctr_type c = {{}};
     RNG::key_type k = {{}};
-    MicroURNG<RNG, 31> longmurng(c.incr(), k);
+    MicroURNG<RNG> longmurng(c.incr(), k);
 #if R123_USE_STD_RANDOM
     std::uniform_real_distribution<float> u(-1., 1.);
 
@@ -68,9 +67,6 @@ int main(int, char**){
     unsigned long hits=0;
     std::cout << "Calling a single MicroURNG " << NTRIES << " times" << std::endl;
     for(unsigned long i=0; i<NTRIES; ++i){
-        // We need two floats, which should require only two
-        // calls to the underlying URNG, so BITS=1 should be
-        // fine, but is cutting things pretty tight..
         float x = u(longmurng);
         float y = u(longmurng);
         if( (x*x + y*y) < 1.0f )
@@ -79,15 +75,12 @@ int main(int, char**){
     if (pi_check(hits, NTRIES) != 0) {
 	return 1;
     }
-    // It's not much harder to manage the counter ourselves and to
-    // create a very short MicroURNG for every sample:
+    // MicroURNGs are very light-weight.  It shouldn't be
+    // too expensive to create a new one every time through the loop:
     std::cout << "Creating and calling a new MicroURNG " << NTRIES << " times" << std::endl;
     hits=0;
     for(unsigned long i=0; i<NTRIES; ++i){
-        // We need two floats, which should require only two
-        // calls to the underlying URNG, so BITS=1 should be
-        // fine, but is cutting things pretty tight..
-        MicroURNG<RNG, 1> shorturng(c.incr(), k);
+        MicroURNG<RNG> shorturng(c.incr(), k);
         float x = u(shorturng);
         float y = u(shorturng);
         if( (x*x + y*y) < 1.0f )
@@ -96,14 +89,11 @@ int main(int, char**){
     return pi_check(hits, NTRIES);
 #else
     // MicroURNG's are interesting because they allow us to use std::distributions,
-    // as in the above code.  They should work, but hardly seem worth the trouble
-    // if C++0x <random> isn't available...
+    // as in the above code.  Std::distributions are nice, but if all we need is
+    // a uniform integer, we can do without such fancy C++0x features:
     unsigned long hits=0;
     std::cout << "Calling a single MicroURNG " << NTRIES << " times" << std::endl;
     for(unsigned long i=0; i<NTRIES; ++i){
-        // We need two floats, which should require only two
-        // calls to the underlying URNG, so BITS=1 should be
-        // fine, but is cutting things pretty tight..
         float x = 2.*longmurng()/(double)std::numeric_limits<uint32_t>::max() - 1.;
         float y = 2.*longmurng()/(double)std::numeric_limits<uint32_t>::max() - 1.;
         if( (x*x + y*y) < 1.0f )

@@ -34,11 +34,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * Uses macros and util_expandtpl.h to "templatize" over all the
  * different permutations of RNGs and NxW and R.
  */
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <errno.h>
-#include "util_macros.h"
 #include "util.h"
 
 #include "Random123/philox.h"
@@ -63,7 +58,6 @@ void NAME##N##x##W##_##R(NAME##N##x##W##_ukey_t ukey, NAME##N##x##W##_ctr_t ctr,
     uint kcount = 0; \
     double basetime = 0., dt = 0., mindt = 0.; \
     NAME##N##x##W##_ctr_t C, *hC = &C; \
-    NAME##N##x##W##_key_t key; \
     \
     for (n = -2; n < niterations; n++) { \
 	if (n == -2) { \
@@ -73,7 +67,6 @@ void NAME##N##x##W##_##R(NAME##N##x##W##_ukey_t ukey, NAME##N##x##W##_ctr_t ctr,
 		dprintf(("starting with count = %u\n", count)); \
 	    } \
 	    kcount = count; \
-            kcount = 1; /* DEBUG HACK */ \
 	} else if (n == -1) { \
 	    /* use first iteration time to calibrate count to get approximately sec_per_trial */ \
 	    if (count > 1) { \
@@ -105,9 +98,8 @@ void NAME##N##x##W##_##R(NAME##N##x##W##_ukey_t ukey, NAME##N##x##W##_ctr_t ctr,
 	    kcount = count + 1; \
 	} \
 	dprintf(("call function %s\n", kernelname)); \
-	key = NAME##N##x##W##keyinit(ukey); \
 	(void)timer(&cur_time); \
-	test_##NAME##N##x##W##_##R(kcount, key, ctr, hC); \
+	test_##NAME##N##x##W##_##R(kcount, ukey, ctr, hC); \
 	dt = timer(&cur_time); \
 	dprintf(("iteration %d took %.3f secs\n", n, dt)); \
 	ALLZEROS(hC, 1, N); \

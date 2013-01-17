@@ -32,7 +32,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <Random123/threefry.h>
 #include <iostream>
 
-int main(int argc, char **argv){
+int main(int, char **){
     typedef r123::Threefry2x64 CBRNG;
     CBRNG g;
     CBRNG::ctr_type  ctr = {{0,0}};

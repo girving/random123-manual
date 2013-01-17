@@ -52,7 +52,7 @@ using namespace r123;
 
 #include "pi_check.h"
 
-int main(int argc, char **argv){
+int main(int, char **){
     unsigned long hits = 0, tries = 0;
     const int64_t two_to_the_62 = ((int64_t)1)<<62;
 

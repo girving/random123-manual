@@ -64,7 +64,8 @@ struct ReinterpretCtr{
     // memcpys, inlines the operator()(c,k), and produces assembly
     // language that ends with an aesenclast instruction with a
     // destination operand pointing to an unaligned memory address ...
-    // Segfault!  MSVC also produces code that crashes.  We suspect a
+    // Segfault!  See:  http://gcc.gnu.org/bugzilla/show_bug.cgi?id=50444
+    // MSVC also produces code that crashes.  We suspect a
     // similar mechanism but haven't done the debugging necessary to
     // be sure.  We were able to 'fix' gcc4.6 by making bc a mutable
     // data member rather than declaring it in the scope of
@@ -76,10 +77,10 @@ struct ReinterpretCtr{
     // Sep 2011.
     ctr_type  operator()(ctr_type c, key_type k){
         bctype bc;
-        memcpy(&bc, &c, sizeof(c));
+        std::memcpy(&bc, &c, sizeof(c));
         CBRNG b;
         bc = b(bc, k);
-        memcpy(&c, &bc, sizeof(bc));
+        std::memcpy(&c, &bc, sizeof(bc));
         return c;
     }
 };

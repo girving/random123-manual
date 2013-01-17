@@ -62,10 +62,17 @@ the platform that you intend to run on.
 
 @subsection kat Known Answer Tests
 
-The file \c examples/kat_vectors contains a few thousand "Known Answer Test" vectors,
-i.e., tuples of (method, counter, key, answer).  The programs katc.c (C) and 
-katpp.cpp (C++) read this file, and verify that their compiled implementations
-of the methods obtain the same "known answers" as those in the file.
+Testing that your compiled code computes the same "Known Answers" as the
+reference implementation which has been subjected to the Crush batteries of
+statistical tests is critically important.
+
+The file \c examples/kat_vectors contains a few thousand "Known Answer
+Test" vectors, i.e., tuples of (method, counter, key, answer).  The
+source file katc.c is incorporated into kat_c.c (C),
+kat_cpp.cpp (C++), kat_cuda.cu (CUDA) and kat_opencl.c
+(OpenCL), which are compiled into kat_c, kat_cpp, kat_cuda
+and kat_opencl, respectively.  Each of these will read kat_vectors
+and verify that the compiled code obtains the same "known answers".
 
 The kat vectors are not language-specific.  Implementations of CBRNGs in
 other languages could also be validated against \c kat_vectors.  The

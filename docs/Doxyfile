@@ -1379,6 +1379,7 @@ PREDEFINED             = \
   "__cplusplus " \
   "R123_USE_SSE= 1" \
   "R123_USE_AES_NI= 1" \
+  "R123_USE_U01_DOUBLE= 1" \
   "R123_USE_PHILOX_64BIT= 1"
 
 # If the MACRO_EXPANSION and EXPAND_ONLY_PREDEF tags are set to YES then

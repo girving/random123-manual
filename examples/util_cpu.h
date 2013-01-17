@@ -32,42 +32,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef UTIL_CPU_H__
 #define UTIL_CPU_H__ 1
 
-#include "util_macros.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#define MAXFILESIZE 65000
-
-extern const char *progname;
-
-/* strdup may or may not be in string.h, depending on the value
-   of the pp-symbol _XOPEN_SOURCE and other arcana.  Just
-   do it ourselves.
-   Mnemonic:  "ntcs" = "nul-terminated character string" */
-static char *ntcsdup(const char *s){
-    char *p = (char *)malloc(strlen(s)+1);
-    strcpy(p, s);
-    return p;
-}
-
-static char *readfile(const char *filename)
-{
-    FILE *fp;
-    size_t sz;
-    char *src;
-    if ((fp = fopen(filename, "r")) == NULL)
-	return NULL;
-    sz = MAXFILESIZE;
-    CHECKNOTZERO(src = (char *)malloc(sz + 1));
-    dprintf(("allocated %lu\n", (unsigned long)sz));
-    if ((sz = fread(src, 1, sz, fp)) == 0 || ferror(fp)) {
-	fprintf(stderr, "%s: error reading %s: %s\n", progname, filename, strerror(errno));
-	exit(1);
-    }
-    src[sz] = '\0';
-    CHECKZERO(fclose(fp));
-    return src;
-}
+#include "util.h"
 
 /*
  * burn a little CPU by computing a logistic map function
@@ -85,6 +50,7 @@ static double warmupCPU(long n){
 }
 
 #if defined(_MSC_VER)
+#define NOMINMAX    /* tells Windows.h to NOT define min() & max() */
 #include <Windows.h>
 static double clockspeedHz(int *ncores, char **modelnamep) {
     /*
@@ -136,20 +102,20 @@ static double clockspeedHz(int *ncores, char  **modelnamep){
 #elif defined(__linux__)
 /* Read the clock speed from /proc/cpuinfo - Linux-specific! */
 static double clockspeedHz(int *ncores, char **modelnamep){
-    char *cpuinfo, *s, *stmp;
+    char *s, buf[1024]; /* long enough for any /proc/cpuinfo line */
     double Mhz = 0.;
     double xMhz;
     int i;
     double d = warmupCPU(100L*1000L*1000L);
-    if ((cpuinfo = readfile("/proc/cpuinfo")) == NULL) {
+    FILE *fp;
+    if ((fp = fopen("/proc/cpuinfo", "r")) == NULL) {
 	if (ncores) *ncores = 1;
 	if (modelnamep) *modelnamep = ntcsdup("unknown");
 	return 0.;
     }
     if (ncores) *ncores = 0;
-    if (modelnamep) {
-	s = strstr(cpuinfo, "model name");
-	if (s) {
+    while (fgets(buf, sizeof buf, fp) != NULL) {
+	if (modelnamep && (s = strstr(buf, "model name")) != NULL) {
 	    CHECKNOTZERO(s = strchr(s, ':'));
 	    while (*++s == ' ')
 		;
@@ -160,24 +126,20 @@ static double clockspeedHz(int *ncores, char **modelnamep){
 	    dprintf(("raw modelname is %d bytes: %s\n", i, *modelnamep));
 	    nameclean(*modelnamep);
 	    dprintf(("cleaned modelname is %s\n", *modelnamep));
-	} else
-	    dprintf(("unknown modelname"));
-    }
-    s = cpuinfo;
-    while ((stmp = strstr(s, "cpu MHz")) || ((stmp = strstr(s, "clock")))) {
-	s = stmp;
-	if (s[1] == 'p') // cpu MHz
-	    CHECKNOTZERO(sscanf(s, "cpu MHz : %lf %n", &xMhz, &i));
-	else
-	    CHECKNOTZERO(sscanf(s, "clock : %lfMHz %n", &xMhz, &i));
-	dprintf(("parsed %f %d\n", xMhz, i));
-	if (xMhz > Mhz) Mhz = xMhz;
-	s += i;
-	if (ncores) *ncores += 1;
+	}
+	if ((s = strstr(buf, "cpu MHz")) || (s = strstr(buf, "clock"))) {
+	    if (s[1] == 'p') // cpu MHz
+		CHECKNOTZERO(sscanf(s, "cpu MHz : %lf %n", &xMhz, &i));
+	    else // clock
+		CHECKNOTZERO(sscanf(s, "clock : %lfMHz %n", &xMhz, &i));
+	    dprintf(("parsed %f %d\n", xMhz, i));
+	    if (xMhz > Mhz) Mhz = xMhz;
+	    s += i;
+	    if (ncores) *ncores += 1;
+	}
     }
     d = Mhz*1e6;
     dprintf(("clockspeed is %f\n", d));
-    free(cpuinfo);
     return d;
 }
 #elif defined(__FreeBSD__)

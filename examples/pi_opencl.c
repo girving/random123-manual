@@ -32,18 +32,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // Simple OpenCL device kernel and host main program to
 // compute pi via random darts at a square
 
-#include <stdio.h>
-#include <string.h>
-#include <errno.h>
-
-#include "pi_check.h"
-
-// A few small utility functions and macros
-#include "util.h"
-#include "util_macros.h"
-
 // functions to do boilerplate OpenCL begin and end
 #include "util_opencl.h"
+#include "pi_check.h"
 
 // Include preprocessed kernel declaration for the array src 
 // The GNUmakefile will create pi_opencl_kernel.i in the build
@@ -69,7 +60,7 @@ main(int argc, char **argv)
 
     d = timer(&d);
     progname = argv[0];
-    verbose = debug = argc > 3 ? atoi(argv[2]): 0;
+    verbose = debug = argc > 2 ? atoi(argv[2]): 0;
     infop = opencl_init(argc > 3 ? argv[3] : NULL, opencl_src, argc > 4 ? argv[4] : "");
     CHECKERR(kern = clCreateKernel(infop->prog, kernelname, &err));
     if (infop->wgsize > 64) infop->wgsize /= 2;
@@ -77,7 +68,7 @@ main(int argc, char **argv)
     if (count == 0)
 	count = NTRIES/nthreads;
     hits_sz = nthreads * sizeof(hits_host[0]);
-    CHECKNOTZERO(hits_host = malloc(hits_sz));
+    CHECKNOTZERO(hits_host = (cl_uint2 *)malloc(hits_sz));
     CHECKERR(hits_dev = clCreateBuffer(infop->ctx, CL_MEM_WRITE_ONLY, hits_sz, 0, &err));
     CHECK(clSetKernelArg(kern, 0, sizeof(cl_uint), (void*)&count));
     CHECK(clSetKernelArg(kern, 1, sizeof(cl_mem), (void*)&hits_dev));

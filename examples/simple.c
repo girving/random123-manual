@@ -36,6 +36,7 @@ int main(int argc, char **argv){
     int i;
     threefry2x64_ctr_t  ctr = {{0,0}};
     threefry2x64_key_t key = {{0xdeadbeef, 0xbadcafe}};
+    (void)argc; (void)argv; /* unused */
     printf( "The first few randoms with key %llx %llx\n",
 	   (unsigned long long)key.v[0], (unsigned long long)key.v[1]);
     for(i=0; i<10; ++i){

@@ -39,13 +39,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
    an underlying threefry4x64 counter-based rng (cbrng).
    We can call cbrng 8 times between calls to cbrng_reset */
 
-GSL_MICRORNG(cbrng, threefry4x64, 3); /* creates gsl_rng_cbrng */
+GSL_MICRORNG(cbrng, threefry4x64); /* creates gsl_rng_cbrng */
 
 #include "pi_check.h"
 
 int main(int argc, char **argv){
     unsigned long hits = 0, tries = 0;
     gsl_rng *r;
+    (void)argc; (void)argv; /* unused */
 
     threefry4x64_ctr_t c = {{0}};
     threefry4x64_key_t k = {{0}};

@@ -18,15 +18,15 @@ meta_targets:=kat core aesni timing c cpp gsl thread cuda opencl
 # (specifically, the gsl-config program in the PATH), thread requires POSIX threads,
 # CUDA requires NVIDIA CUDA 3.x or newer, OpenCL requires OpenCL includes & libraries
 # (e.g. AMD APP SDK, NVIDIA SDK)
-c:=katc pi_capi simple ut_ars time_serial
-cpp:=katpp pi_cppapi simplepp ut_carray ut_M128 ut_features ut_ReinterpretCtr ut_Engine ut_aes pi_aes timers pi_microurng
+c:=kat_c kat_u01_c pi_capi pi_u01 simple ut_ars time_serial
+cpp:=kat_cpp kat_u01_cpp pi_cppapi simplepp ut_carray ut_M128 ut_features ut_ReinterpretCtr ut_Engine ut_aes pi_aes timers pi_microurng
 gsl:=pi_gsl ut_gsl
 thread:=time_thread
-cuda:=pi_cuda pi_cudapp time_cuda
-opencl:=pi_opencl time_opencl
+cuda:=pi_cuda pi_cudapp time_cuda kat_cuda kat_u01_cuda
+opencl:=pi_opencl time_opencl kat_opencl kat_u01_opencl
 
 # Convenience metatargets: these are to help developers test functional subsets across platforms
-kat:=katc katpp
+kat:=kat_c kat_u01_c kat_cpp
 core:=$(c) $(cpp)
 aesni:=pi_aes ut_aes ut_ars
 timing:=timers time_serial time_thread
@@ -37,6 +37,13 @@ $(gsl) : override CFLAGS += `gsl-config --cflags`
 $(opencl) : % : %_kernel.i
 $(opencl) : override LDLIBS+=-lOpenCL
 $(opencl) : override CFLAGS+=-I.
+# Note, the Intel OpenCL SDK (1.5) has unresolved C++ symbols in its
+# libOpenCL.so Even though 'main' is a C program, you may need to link
+# it with a C++ compiler-driver, e.g., g++.  Since this Makefile does
+# compile-and-link in one step, use something like:
+# $(opencl) : CC=g++ -xc
+# which will invoke the g++ compiler-driver, but will treat the
+# program as C rather than C++.
 
 # N.B. gcc -pthread (without the -l) on linux at compile time also
 # adds -D_REENTRANT.  Unfortunately -pthread is unrecognized by
@@ -103,7 +110,10 @@ run% : %
 
 # In lieu of autodepends, just say that all the compilation targets depend on all the headers.
 hdrs:=$(wildcard $(srcdir/)*.h $(srcdir/)gsl/*.c $(INC)/Random123/*.h $(INC)/Random123/*.hpp $(INC)/Random123/*/*.h $(INC)/Random123/*/*.hpp)
+misc:=$(wildcard $(srcdir/)*.cu $(srcdir/)*.ocl)
 $(all_primary_targets) : $(hdrs)
+$(misc) : $(hdrs)
+kat_u01_cpp.cpp : kat_u01_c.c
 
 # If you put force=y on the command line, then $(all_primary_targets) will be
 # depend on FORCE, and hence will not be up-to-date.

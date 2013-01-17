@@ -46,7 +46,7 @@ typedef struct r123array1xm128i aesni1xm128i_ukey_t;
 /** @ingroup AESNI */
 typedef struct r123array4x32 aesni4x32_ukey_t;
 /** @ingroup AESNI */
-enum { aesni1xm128i_rounds = 10 };
+enum r123_enum_aesni1xm128i { aesni1xm128i_rounds = 10 };
 
 /** \cond HIDDEN_FROM_DOXYGEN */
 R123_STATIC_INLINE __m128i AES_128_ASSIST (__m128i temp1, __m128i temp2) { 
@@ -183,7 +183,7 @@ typedef struct r123array4x32 aesni4x32_ctr_t;
 /** @ingroup AESNI */
 typedef aesni1xm128i_key_t aesni4x32_key_t;
 /** @ingroup AESNI */
-enum { aesni4x32_rounds = 10 };
+enum r123_enum_aesni4x32 { aesni4x32_rounds = 10 };
 /** @ingroup AESNI */
 R123_STATIC_INLINE aesni4x32_key_t aesni4x32keyinit(aesni4x32_ukey_t uk){
     aesni1xm128i_ukey_t uk128;
