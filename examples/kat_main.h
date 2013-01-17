@@ -1,3 +1,34 @@
+/*
+Copyright 2010-2011, D. E. Shaw Research.
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
+
+* Redistributions of source code must retain the above copyright
+  notice, this list of conditions, and the following disclaimer.
+
+* Redistributions in binary form must reproduce the above copyright
+  notice, this list of conditions, and the following disclaimer in the
+  documentation and/or other materials provided with the distribution.
+
+* Neither the name of D. E. Shaw Research nor the names of its
+  contributors may be used to endorse or promote products derived from
+  this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+*/
 /* Known Answer Test */
 
 /* We use the same source files to implement the Known Answer Test
@@ -24,7 +55,7 @@
    on the device.  Except for a few environment-specific keywords,
    (e.g., __global, __kernel), which are #defined in kat_XXX.c,
    dev_execute_tests is obtained by including a common source file:
-      #include <kat_dev_execute.c>
+      #include <kat_dev_execute.h>
 
    One final complication:  in order to fully "bake" the source code
    into the binary at compile-time, dev_execute_tests for opencl is implemented in
@@ -33,84 +64,9 @@
    
 */
 #include "kat.h"
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-#include <errno.h>
-#include <assert.h>
+#include "util.h"
 
 #define LINESIZE 1024
-
-/* MSVC doesn't know about strtoull.  Strictly speaking, strtoull
-   isn't standardized in C++98, either, but that seems not to be a
-   problem so we blissfully ignore it and use strtoull (or its MSVC
-   equivalent, _strtoui64) in both C and C++.  If strtoull in C++
-   becomes a problem, we can adopt the prtu strategy (see below) and
-   write C++ versions of strtouNN, that use an istringstream
-   instead. */
-#ifdef _MSC_FULL_VER
-#define strtoull _strtoui64
-#endif
-uint32_t strtou32(const char *p, char **endp, int base){
-    uint32_t ret;
-    errno = 0;
-    ret = strtoul(p, endp, base);
-    assert(errno==0);
-    return ret;
-}
-uint64_t strtou64(const char *p, char **endp, int base){
-    uint64_t ret;
-    errno = 0;
-    ret = strtoull(p, endp, base);
-    assert(errno==0);
-    return ret;
-}
-
-#if defined(__cplusplus)
-/* Strict C++98 doesn't grok %llx or unsigned long long, and with
-   aggressive error-checking, e.g., g++ -pedantic -Wall, will refuse
-   to compile code like:
-
-     fprintf(stderr, "%llx", (R123_ULONG_LONG)v);
-
-   On the other hand, when compiling to a 32-bit target, the only
-   64-bit type is long long, so we're out of luck if we can't use llx.
-   A portable, almost-standard way to do I/O on uint64_t values in C++
-   is to use bona fide C++ I/O streams.  We are still playing
-   fast-and-loose with standards because C++98 doesn't have <stdint.h>
-   and hence doesn't even guarantee that there's a uint64_t, much less
-   that the insertion operator<<(ostream&) works correctly with
-   whatever we've typedef'ed to uint64_t in
-   <features/compilerfeatures.h>.  Hope for the best... */
-#include <iostream>
-#include <limits>
-template <typename T>
-void prtu(T val){
-    using namespace std;
-    cerr.width(std::numeric_limits<T>::digits/4);
-    char prevfill = cerr.fill('0');
-    ios_base::fmtflags prevflags = cerr.setf(ios_base::hex, ios_base::basefield);
-    cerr << val;
-    cerr.flags(prevflags);
-    cerr.fill(prevfill);
-    assert(!cerr.bad());
-}
-void prtu32(uint32_t v){ prtu(v); }
-void prtu64(uint64_t v){ prtu(v); }
-
-#else /* __cplusplus */
-/* C should be easy.  inttypes.h was standardized in 1999.  But Microsoft
-   refuses to recognize the 12-year old standard, so: */
-#if defined(_MSC_FULL_VER)
-#define PRIx32 "x"
-#define PRIx64 "I64x"
-#else /* _MSC_FULL_VER */
-#include <inttypes.h>
-#endif /* _MSVC_FULL_VER */
-void prtu32(uint32_t v){ fprintf(stderr, "%08" PRIx32, v); }
-void prtu64(uint64_t v){ fprintf(stderr, "%016" PRIx64, v); }
-
-#endif /* __cplusplus */
 
 int have_aesni = 0;
 int verbose = 0;
@@ -120,15 +76,6 @@ const char *progname;
 
 extern void host_execute_tests(kat_instance *tests, size_t ntests);
                 
-/* strdup may or may not be in string.h, depending on the value
-   of the pp-symbol _XOPEN_SOURCE and other arcana.  Just
-   do it ourselves... */
-char *ntcsdup(const char *s){
-    char *p = (char *)malloc(strlen(s)+1);
-    strcpy(p, s);
-    return p;
-}
-
 /* A little hack to keep track of the test vectors that we don't know how to deal with: */
 int nunknowns = 0;
 #define MAXUNKNOWNS 20

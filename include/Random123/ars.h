@@ -42,7 +42,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif
 
 /** @ingroup AESNI */
-enum {ars1xm128i_rounds = ARS1xm128i_DEFAULT_ROUNDS};
+enum r123_enum_ars1xm128i {ars1xm128i_rounds = ARS1xm128i_DEFAULT_ROUNDS};
 
 /* ARS1xm128i with Weyl keys.  Fast, and Crush-resistant, but NOT CRYPTO. */
 typedef struct r123array1xm128i ars1xm128i_ctr_t;
@@ -113,7 +113,7 @@ typedef struct r123array4x32 ars4x32_key_t;
 /** @ingroup AESNI */
 typedef struct r123array4x32 ars4x32_ukey_t;
 /** @ingroup AESNI */
-enum {ars4x32_rounds = ARS1xm128i_DEFAULT_ROUNDS};
+enum r123_enum_ars4x32 {ars4x32_rounds = ARS1xm128i_DEFAULT_ROUNDS};
 /** @ingroup AESNI */
 R123_STATIC_INLINE ars4x32_key_t ars4x32keyinit(ars4x32_ukey_t uk) { return uk; }
 /** @ingroup AESNI */

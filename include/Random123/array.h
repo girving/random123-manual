@@ -249,14 +249,14 @@ struct r123arrayextractable<uint8_t>{
 
 #define CXXOVERLOADS(_N, W, T)                                          \
                                                                         \
-std::ostream& operator<<(std::ostream& os, const r123array##_N##x##W& a){   \
+inline std::ostream& operator<<(std::ostream& os, const r123array##_N##x##W& a){   \
     os << r123arrayinsertable<T>(a.v[0]);                                  \
     for(size_t i=1; i<_N; ++i)                                          \
         os << " " << r123arrayinsertable<T>(a.v[i]);                       \
     return os;                                                          \
 }                                                                       \
                                                                         \
-std::istream& operator>>(std::istream& is, r123array##_N##x##W& a){         \
+inline std::istream& operator>>(std::istream& is, r123array##_N##x##W& a){         \
     for(size_t i=0; i<_N; ++i){                                         \
         r123arrayextractable<T> x(a.v[i]);                                 \
         is >> x;                                                        \

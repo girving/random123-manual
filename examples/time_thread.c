@@ -40,7 +40,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <string.h>
 #include <errno.h>
 #include <sys/stat.h>
-#include "util_macros.h"
 #include "util.h"
 
 #include "Random123/philox.h"
@@ -124,9 +123,9 @@ void NAME##N##x##W##_##R(NAME##N##x##W##_ukey_t ukey, NAME##N##x##W##_ctr_t ctr,
     pthread_t me = pthread_self(); /* parent thread id */ \
     pthread_t *tids; /* array of child thread ids */ \
     void *vp; /* return from join */ \
-    CHECKNOTZERO(thread_info = malloc(sizeof(thread_info[0])*tp->ncores)); \
-    CHECKNOTZERO(tap = malloc(sizeof(tap[0])*tp->ncores)); \
-    CHECKNOTZERO(tids = malloc(sizeof(tids[0])*tp->ncores)); \
+    CHECKNOTZERO(thread_info = (ThreadInfo *) malloc(sizeof(thread_info[0])*tp->ncores)); \
+    CHECKNOTZERO(tap = (ThreadArg_##NAME##N##x##W##_##R *) malloc(sizeof(tap[0])*tp->ncores)); \
+    CHECKNOTZERO(tids = (pthread_t *) malloc(sizeof(tids[0])*tp->ncores)); \
     for (i = 0; i < tp->ncores; i++) { \
 	thread_info[i].started = 0; \
 	thread_info[i].tid = me; \
@@ -134,7 +133,7 @@ void NAME##N##x##W##_##R(NAME##N##x##W##_ukey_t ukey, NAME##N##x##W##_ctr_t ctr,
 	tap[i].tp = &td; \
     } \
     thread_count = tp->ncores; \
-    CHECKNOTZERO(td.octrs = malloc(sizeof(td.octrs[0])*tp->ncores)); \
+    CHECKNOTZERO(td.octrs = (NAME##N##x##W##_ctr_t *) malloc(sizeof(td.octrs[0])*tp->ncores)); \
     td.ukey = ukey; \
     td.ctr = ctr; \
     td.kcount = 0; \
@@ -199,7 +198,7 @@ void NAME##N##x##W##_##R(NAME##N##x##W##_ukey_t ukey, NAME##N##x##W##_ctr_t ctr,
 	fflush(stdout); \
     } \
     thread_count = 0; \
-    free((void *)thread_info); \
+    free((void *) thread_info); \
     thread_info = NULL; \
     free(td.octrs); \
     free(tap); \

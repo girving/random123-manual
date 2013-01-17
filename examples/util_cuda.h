@@ -36,7 +36,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <cuda_runtime_api.h>
 
 #include "util.h"
-#include "util_macros.h"
 
 // utility macros to check return codes and complain/exit on failure
 #define CHECKLAST(MSG) 	do { cudaError_t e = cudaGetLastError(); if (e != cudaSuccess) {fprintf(stderr, "%s:%d: CUDA Error: %s: %s\n", __FILE__, __LINE__, (MSG), cudaGetErrorString(e)); exit(1); }} while(0)

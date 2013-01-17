@@ -123,7 +123,7 @@ On each iteration,\c r contains an array of 4 32-bit random values that
 will not be repeated by any other call to \c rng as long as \c c and \c k
 are not reused.
 
-In the example above, we use the @ref r123::Philox4x32, but an
+In the example above, we use the @ref r123::Philox4x32, but any
 of the other @ref CBRNG "CBRNGs" would serve equally well.
 
 \subsection Capi The C API
@@ -157,6 +157,11 @@ it is not currently possible to use Random123 functions in
 both the host portion and the device portion of the same .cu source file.
 The Nx32 forms are faster than the Nx64 variants on current (2011)
 32-bit GPU architectures.
+
+It has been reported that Random123 uses 16 bytes of
+static memory per thread.  This is undesirable and not intentional,
+but we do not have a workaround other than to suggest adjusting memory
+allocation accordingly.
 
 The  
 pi_cuda.cu and pi_cudapp.cu examples illustrate the use of CUDA.
@@ -213,12 +218,54 @@ RNG with a completely conventional interface, sacrificing
 application control over the internal RNG state.
 </ul>
 
+\section u01 Generating uniformly distributed float and double values
+
+The CBRNGs in the library all generate uniformly distributed \b
+integers.  Sometimes one needs a uniformly distributed floating point
+value.  For such a simple transformation, the machinery of GSL or a
+C++1x MicroURNG may be overkill.  On the other hand, the
+idiosyncracies of compilers, floating point constants, multiplication
+and division, and mismatches between the number of bits in the input
+and the number of mantissa bits in the ouptut can be tricky to get
+right.  The library provides a header file, @ref u01_closed_open_W_M "<Random123/u01.h>" with a
+variety of static inline functions that map uniform integers of
+various sizes (32 and 64 bits) into floats of various sizes (floats
+with 24-bit mantissas and and doubles with 53-bit mantissas).  The
+output range may be open or closed at either end.
+
+@code
+
+#include <Random123/threefry.h>
+#include <Random123/u01.h>
+
+threefry4x32_ctr_t c={{}};
+threefry4x32_key_t k={{}};
+threefry4x32_ctr_t r;
+float x, y;
+double vx, vy;
+
+k.v[0] = user_supplied_seed;
+for(...){
+    c.v[0] = ???; /* some loop-dependent application variable */
+    c.v[1] = ???; /* another loop-dependent application variable */
+    r = threefry4x32(c, k);
+    /* get two single precision values in the interval (0,1) */
+    x = u01_open_open_32_24(r.v[0]);
+    y = u01_open_open_32_24(r.v[1]);
+    /* get two double precision values in the interval [0,1] */
+    vx = u01_closed_closed_32_53(r.v[2]);
+    vy = u01_closed_closed_32_53(r.v[3]);
+    ...
+}
+@endcode
+
 \subsection Examples Tests and Benchmarks
 
 The @ref ExamplesREADME "examples/" directory, contains tests, examples and benchmarks.
 
 <ul>
-<li> Unit tests for individual components and "known-answer-tests"
+<li> Unit tests for individual components and "known-answer-tests", which
+should be run to ensure that these RNGs build correctly on desired platforms.
 help to provide assurance that the code is being compiled correctly.
 <li> Complete, short programs estimate pi by counting the number of random
 points that fall inside a circle inscribed in a square, demonstrating
@@ -241,6 +288,7 @@ We have tested the Random123 library with the following infrastructure
 <li>Linux, openc64-4.2.4 on x86_64.
 <li>Linux, OpenCL (NVIDIA SDK 4.0.17) on GTX480, M2090 and GTX580 GPUs.
 <li>Linux, OpenCL (AMD APP SDK 2.4 or 2.5), on x86_64 CPUs and Radeon HD6970 GPUs.
+<li>Linux, OpenCL (Intel OpenCL 1.5), on x86_64 CPUs.
 <li>Linux, NVIDIA CUDA 3.2.16 or 4.0.17.
 <li>Linux, gcc-4.1.2 and 4.4.1 on x86.
 <li>Solaris, gcc-3.4.3 and Sun C 5.8, on x86_64 (problems with Sunpro C++ compiler).
@@ -248,6 +296,11 @@ We have tested the Random123 library with the following infrastructure
 <li>MacOS X 5.8, gcc-4.0.1, on x86.
 <li>MacOS X 5.8, llvm-2.9.1 on x86 (problems with catching C++ exceptions).
 <li>Windows 7, Microsoft Visual Studio, version 10.0, Microsoft C/C++ compiler 16.00.
+</ul>
+
+Others have reported success on
+<ul>
+<li>MacOS, OpenCL on x86_64 CPUs
 </ul>
 
 We welcome feedback to random123@deshawresearch.com about ports to other environments.

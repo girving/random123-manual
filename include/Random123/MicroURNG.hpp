@@ -38,37 +38,35 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 namespace r123{
 /**
     Given a CBRNG whose ctr_type has an unsigned integral value_type,
-    MicroURNG<CBRNG, BITS>(c, k) is a type that satisfies the
+    MicroURNG<CBRNG>(c, k) is a type that satisfies the
     requirements of a C++0x Uniform Random Number Generator.
 
     The intended purpose is for a MicroURNG to be passed
     as an argument to a C++0x Distribution, e.g.,
     std::normal_distribution.  See examples/MicroURNG.cpp.
 
-    The MicroURNG functor may only be called a limited number of
-    times.  After
+    The MicroURNG functor has a period of "only"
 
-       ctr_type.size()*2^BITS,
+       ctr_type.size()*2^32,
 
-    calls, it throws a runtime_error.
+    after which it will silently repeat.
 
-    The high BITS bits of the highest word in the counter c, passed to
+    The high 32 bits of the highest word in the counter c, passed to
     the constructor must be zero.  MicroURNG uses these bits to
     "count".
 
-    Notice that you can carve out as many BITS as you like from the
-    counter space, and are then free to call the MicroURNG
-    until the bits run out.  If you want a few dozen normally
-    distributed randoms for each of your state/timestep/seed
-    tuples, then give MicroURNG a few extra bits to work with and
-    you're good to go:
+    Older versions of the library permitted a second template
+    parameter by which the caller could control the number of
+    bits devoted to the URNG's internal counter.  This flexibility
+    has been disabled because URNGs created with different
+    numbers of counter bits could, conceivably "collide".
 
 \code
        typedef ?someCBRNG? RNG;
        RNG::ctr_type c = ...; // under application control
        RNG::key_type k = ...; // 
        std::normal_distribution<float> nd;
-       MicroURNG<RNG, 10> urng(c, k);
+       MicroURNG<RNG> urng(c, k);
        for(???){
          ...
          nd(urng);  // may be called several hundred times with BITS=10
@@ -77,7 +75,7 @@ namespace r123{
 \endcode
 */
 
-template<typename CBRNG, unsigned int _BITS>
+template<typename CBRNG>
 class MicroURNG{
     // According to C++0x, a URNG requires only a result_type,
     // operator()(), min() and max() methods.  Everything else
@@ -86,17 +84,17 @@ class MicroURNG{
     // a MicroURNG.
 public:
     typedef CBRNG cbrng_type;
-    static const unsigned BITS = _BITS;
+    static const int BITS = 32;
     typedef typename cbrng_type::ctr_type ctr_type;
     typedef typename cbrng_type::key_type key_type;
     typedef typename cbrng_type::ukey_type ukey_type;
     typedef typename ctr_type::value_type result_type;
 
+    R123_STATIC_ASSERT( std::numeric_limits<result_type>::digits >= BITS, "The result_type must have at least 32 bits" );
+
     result_type operator()(){
         if(last_elem == 0){
             // jam n into the high bits of c
-            if( n >= (((R123_ULONG_LONG)1)<<BITS) )
-                throw std::runtime_error("Incremented high bits of MicroURNG's counter too many times");
             const size_t W = std::numeric_limits<result_type>::digits;
             ctr_type c = c0;
             c[c0.size()-1] |= n<<(W-BITS);
@@ -112,11 +110,11 @@ public:
     MicroURNG(ctr_type _c0, ukey_type _uk) : b(), c0(_c0), k(_uk), n(0), last_elem(0) {
         chkhighbits();
     }
-    result_type min() const{
-        return std::numeric_limits<result_type>::min();
+    result_type min R123_NO_MACRO_SUBST () const{
+        return std::numeric_limits<result_type>::min R123_NO_MACRO_SUBST ();
     }
-    result_type max() const{
-        return std::numeric_limits<result_type>::max();
+    result_type max R123_NO_MACRO_SUBST () const{
+        return std::numeric_limits<result_type>::max R123_NO_MACRO_SUBST ();
     }
     // extra methods:
     const ctr_type& counter() const{ return c0; }
@@ -137,7 +135,7 @@ private:
     ctr_type rdata;
     void chkhighbits(){
         result_type r = c0[c0.size()-1];
-        result_type mask = std::numeric_limits<result_type>::max()>>BITS;
+        result_type mask = ((uint64_t)std::numeric_limits<result_type>::max R123_NO_MACRO_SUBST ())>>BITS;
         if((r&mask) != r)
             throw std::runtime_error("MicroURNG: c0, does not have high bits clear");
     }

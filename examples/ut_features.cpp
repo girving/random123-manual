@@ -246,12 +246,20 @@ void chkassert(){
 #endif
 
 #ifndef R123_STATIC_ASSERT
-#error "No  R123_ASSERT"
+#error "No  R123_STATIC_ASSERT"
 #else
 R123_STATIC_ASSERT(1, "looks true to me");
 void chkstaticassert(){
     R123_STATIC_ASSERT(1, "it's ok inside a function too");
 }
+#endif
+
+#ifndef R123_USE_U01_DOUBLE
+#error "No R123_USE_U01_DOUBLE"
+#else
+#if R123_USE_U01_DOUBLE
+double foodbl = (1./(4294967296.*4294967296.));
+#endif
 #endif
 
 int main(int , char **){return 0;}

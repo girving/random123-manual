@@ -42,7 +42,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <string.h>
 #include <errno.h>
 #include <unistd.h>
-#include "util_macros.h"
 #include "util.h"
 
 #include "Random123/philox.h"
@@ -72,7 +71,7 @@ void NAME##N##x##W##_##R(NAME##N##x##W##_ukey_t ukey, NAME##N##x##W##_ctr_t ctr,
     const size_t nworkitems = tp->wgsize * tp->cores; \
     const size_t szC = nworkitems*sizeof(hC[0]); \
     /* allocate and initialize vector of counters in host memory */ \
-    CHECKNOTZERO(hC = malloc(szC)); \
+    CHECKNOTZERO(hC = (NAME##N##x##W##_ctr_t *) malloc(szC)); \
     for (i = 0; i < nworkitems; i++) { \
 	int xi; \
 	for (xi = 0; xi < N; xi++) \
@@ -169,7 +168,7 @@ void NAME##N##x##W##_##R(NAME##N##x##W##_ukey_t ukey, NAME##N##x##W##_ctr_t ctr,
 
 int main(int argc, char **argv)
 {
-    char *cp;
+    const char *cp;
     uint count = 0;
     UCLInfo *infop;
     int keyctroffset = 0;

@@ -32,23 +32,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef UTIL_CPU_H__
 #define UTIL_CPU_H__ 1
 
-#include "util_macros.h"
+#include "util.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #define MAXFILESIZE 65000
-
-extern const char *progname;
-
-/* strdup may or may not be in string.h, depending on the value
-   of the pp-symbol _XOPEN_SOURCE and other arcana.  Just
-   do it ourselves.
-   Mnemonic:  "ntcs" = "nul-terminated character string" */
-static char *ntcsdup(const char *s){
-    char *p = (char *)malloc(strlen(s)+1);
-    strcpy(p, s);
-    return p;
-}
 
 static char *readfile(const char *filename)
 {
@@ -85,6 +73,7 @@ static double warmupCPU(long n){
 }
 
 #if defined(_MSC_VER)
+#define NOMINMAX    /* tells Windows.h to NOT define min() & max() */
 #include <Windows.h>
 static double clockspeedHz(int *ncores, char **modelnamep) {
     /*

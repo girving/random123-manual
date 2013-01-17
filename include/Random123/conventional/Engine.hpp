@@ -161,8 +161,8 @@ public:
         return is;
     }
 
-    static result_type min() { return 0; }
-    static result_type max() { return std::numeric_limits<result_type>::max(); }
+    static result_type min R123_NO_MACRO_SUBST () { return 0; }
+    static result_type max R123_NO_MACRO_SUBST () { return std::numeric_limits<result_type>::max R123_NO_MACRO_SUBST (); }
 
     result_type operator()(){
         if( c.size() == 1 )     // short-circuit the scalar case.  Compilers aren't mind-readers.

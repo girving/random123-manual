@@ -85,10 +85,14 @@ static unsigned long int NAME##_get(void *vstate){                      \
         st->r = CBRNGNAME(st->ctr, st->key);                                 \
         st->elem = N;                                                   \
     }                                                                   \
-    return st->r.v[--st->elem];                                         \
+    return 0xffffffffUL & st->r.v[--st->elem];                          \
 }                                                                       \
                                                                         \
-static double NAME##_get_double (void * vstate);                        \
+static double                                                           \
+NAME##_get_double (void * vstate)                                       \
+{                                                                       \
+    return NAME##_get (vstate)/4294967296.0;                            \
+}                                                                       \
                                                                         \
 static void NAME##_set(void *vstate, unsigned long int s){              \
     NAME##_state *st = (NAME##_state *)vstate;                          \
@@ -110,19 +114,13 @@ static void NAME##_set(void *vstate, unsigned long int s){              \
                                                                         \
 static const gsl_rng_type NAME##_type = {                               \
     #NAME,                                                              \
-    ~0UL>>((R123_W(CBRNGNAME##_ctr_t)>=8*sizeof(unsigned long))? 0 : (8*sizeof(unsigned long) - R123_W(CBRNGNAME##_ctr_t))),     \
+    0xffffffffUL,                                                       \
     0,                                                                  \
     sizeof(NAME##_state),                                               \
     &NAME##_set,                                                        \
     &NAME##_get,                                                        \
     &NAME##_get_double                                                  \
 };                                                                      \
-                                                                        \
-static double                                                           \
-NAME##_get_double (void * vstate)                                       \
-{                                                                       \
-    return NAME##_get (vstate)/(double)NAME##_type.max;                 \
-}                                                                       \
                                                                         \
 const gsl_rng_type *gsl_rng_##NAME = &NAME##_type
 

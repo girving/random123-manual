@@ -277,7 +277,7 @@ R123_CUDA_DEVICE R123_STATIC_INLINE struct r123array2x##W _philox4x##W##bumpkey(
 
 #define _philoxNxW_tpl(N, Nhalf, W, T)                         \
 /** @ingroup PhiloxNxW */                                       \
-enum { philox##N##x##W##_rounds = PHILOX##N##x##W##_DEFAULT_ROUNDS }; \
+enum r123_enum_philox##N##x##W { philox##N##x##W##_rounds = PHILOX##N##x##W##_DEFAULT_ROUNDS }; \
 typedef struct r123array##N##x##W philox##N##x##W##_ctr_t;                  \
 typedef struct r123array##Nhalf##x##W philox##N##x##W##_key_t;              \
 typedef struct r123array##Nhalf##x##W philox##N##x##W##_ukey_t;              \

@@ -92,6 +92,8 @@ All boolean-valued pre-processor symbols in Random123/features/compilerfeatures.
          MULHILO64_OPENCL_INTRIN
          MULHILO64_C99
 
+         U01_DOUBLE
+	 
 @endverbatim
 Most have obvious meanings.  Some non-obvious ones:
 
@@ -108,10 +110,14 @@ If the XXXINTRIN_H macros are true, then one should
 @endcode
 to gain accesss to compiler intrinsics.
 
-R123_USE_CXX0X says that C++0x features are available.  It is
+CXX0X says that C++0x features are available.  It is
 therefore safe to use things like static_assert and defaulted
 and deleted constructors.  Specific C++0x features, e.g., \<random\> may be
 under the control of other macros.
+
+U01_DOUBLE defaults on, and can be turned off (set to 0)
+if one does not want the utility functions that convert to double
+(i.e. u01_*_53()), e.g. on OpenCL without the cl_khr_fp64 extension.
 
 There are a number of invariants that are always true.  Application code may
 choose to rely on these:
@@ -176,12 +182,12 @@ added to each of the *features.h files, AND to examples/ut_features.cpp.
 */
 
 /* N.B.  most other compilers (icc, nvcc, open64, llvm) will also define __GNUC__, so order matters. */
-#if defined(__ICC)
-#include "iccfeatures.h"
+#if defined(__OPENCL_VERSION__) && __OPENCL_VERSION__ > 0
+#include "openclfeatures.h"
 #elif defined(__CUDACC__)
 #include "nvccfeatures.h"
-#elif defined(__OPENCL_VERSION__) && __OPENCL_VERSION__ > 0
-#include "openclfeatures.h"
+#elif defined(__ICC)
+#include "iccfeatures.h"
 #elif defined(__SUNPRO_C) || defined(__SUNPRO_CC)
 #include "sunprofeatures.h"
 #elif defined(__OPEN64__)
@@ -231,5 +237,21 @@ added to each of the *features.h files, AND to examples/ut_features.cpp.
 #ifndef R123_THROW
 #define R123_THROW(x)    throw (x)
 #endif
+
+#ifndef R123_USE_U01_DOUBLE
+#define R123_USE_U01_DOUBLE 1
+#endif
+
+/*
+ * Windows.h (and perhaps other "well-meaning" code define min and
+ * max, so there's a high chance that our definition of min, max
+ * methods or use of std::numeric_limits min and max will cause
+ * complaints in any program that happened to include Windows.h or
+ * suchlike first.  We use the null macro below in our own header
+ * files definition or use of min, max to defensively preclude
+ * this problem.  It may not be enough; one might need to #define
+ * NOMINMAX before including Windows.h or compile with -DNOMINMAX.
+ */
+#define R123_NO_MACRO_SUBST
 
 /** \endcond */
