@@ -46,6 +46,7 @@ GSL_MICRORNG(cbrng, threefry4x64); /* creates gsl_rng_cbrng */
 int main(int argc, char **argv){
     unsigned long hits = 0, tries = 0;
     gsl_rng *r;
+    (void)argc; (void)argv; /* unused */
 
     threefry4x64_ctr_t c = {{0}};
     threefry4x64_key_t k = {{0}};

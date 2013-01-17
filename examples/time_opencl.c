@@ -37,20 +37,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #define R123_USE_AES_NI	0 /* never use this for OpenCL */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <errno.h>
-#include <unistd.h>
-#include "util.h"
+#include "util_opencl.h"
 
 #include "Random123/philox.h"
 #include "Random123/threefry.h"
 
-
 #include "time_misc.h"
 #include "util_print.h"
-#include "util_opencl.h"
 
 #define TEST_TPL(NAME, N, W, R) \
 void NAME##N##x##W##_##R(NAME##N##x##W##_ukey_t ukey, NAME##N##x##W##_ctr_t ctr, NAME##N##x##W##_ctr_t kactr, uint count, UCLInfo *tp) \

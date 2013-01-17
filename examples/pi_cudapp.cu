@@ -32,17 +32,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // Simple CUDA device kernel and host main program to
 // compute pi via random darts at a square
 
-#include <Random123/philox.h>
-#include <string.h>
-#include <stdio.h>
-#include <errno.h>
-#include <cuda.h>
-#include <cuda_runtime_api.h>
-
-// A few small utility functions and macros
-#include "util.h"
 // functions for boilerplate CUDA init and done
 #include "util_cuda.h"
+
+#include <Random123/philox.h>
 
 using namespace r123;
 

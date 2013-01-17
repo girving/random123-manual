@@ -1,6 +1,22 @@
 /**
 @page "Release Notes"
 <dl>
+<dt>1.07 - Nov 7, 2012 </dt>
+<dd><ul>
+<li> Provide const static data members:  _Min and _Max in Engine and MicroURNG, which
+work around a non-standard requirement imposed by the MacOS Xcode 4.5.2 <random> library.
+<li> Fine-grained test macros for specific features of C++11 rather than
+an all-or-none USE_CXX0X macro.  Features tested:
+constexpr, unrestricted unions, explicit conversions, &lt;random&gt; and &lt;type_traits&gt;.
+<li> Declare max() and min() methods with the R123_CONSTEXPR attribute
+in Engine and MicroURNG.
+<li> Improved clang support
+<li> Works with Solaris Sun CC now (requires -library=stlport4)
+<li> NVIDIA GTX6x0 should report correct core count
+<li> ut_features prints the list of features that compile on the build platform
+<li> Compiles cleanly with -Wall -Wextra (implying -Wunused-parameter -Wsign-compare)
+</ul></dd>
+
 <dt>1.06 - Apr 5, 2012 </dt>
 <dd><ul>
 <li> Added a known answer test for the u01 functions (kat_u01).
@@ -13,11 +29,11 @@ MicroURNG and GSL_MICROURNG no longer give the programmer control
 over the number bits in the internal counter via a template or macro argument.
 Such flexibility is too easy to misuse, with the possible consequence
 of repeating random values.  Now, all MicroURNGs have a period in
-excess of 2^32, and MicroURNG<CBRNG>(c1, k1)
-and MicroURNG<CBRNG>(c2, k2) "collide" if and only if c1==c2 and k1==k2.</li>
-<li>Added <Random123/u01.h> header file with static functions for conversion
+excess of 2^32, and MicroURNG&lt;CBRNG&gt;(c1, k1)
+and MicroURNG&lt;CBRNG&gt;(c2, k2) "collide" if and only if c1==c2 and k1==k2.</li>
+<li>Added &lt;Random123/u01.h&gt; header file with static functions for conversion
 of integers to uniformly distributed floating point values.</li>
-<li>Make operator<<(ostream&, const r123array&) and operator>>(ostream&, r123array&)
+<li>Make operator&lt;&lt;(ostream&amp;, const r123array&amp;) and operator&gt;&gt;(ostream&amp;, r123array&amp;)
 inline.  This should work around ODR violations when the header files are
 included in more than one file in a project.</li>
 <li>Recognize that icpc has an _mm_set_epi64x intrinsic as of version 12.1.</li>
@@ -49,8 +65,8 @@ new kat_vectors - there are now three tests for each tested generator: gen(ctr=0
 <li> replace r123array::assemble methods with r123array::seed(SeedSeq) template </li>
 <li> cleanup of signatures of Engine and MicroURNG methods: 
    <ul>
-      <li> Engine(ukey_type&) and MicroURNG(ctr_type, ukey_type) constructors.</li>
-      <li> Engine(SeedSeq&) takes a reference argument, and, when C++0x &lt;type_traits&gt;
+      <li> Engine(ukey_type&amp;) and MicroURNG(ctr_type, ukey_type) constructors.</li>
+      <li> Engine(SeedSeq&amp;) takes a reference argument, and, when C++0x &lt;type_traits&gt;
            are available the SeedSeq templates don't participate in "surprising" overloads. </li>
    </ul>
 </li>
@@ -60,7 +76,7 @@ new kat_vectors - there are now three tests for each tested generator: gen(ctr=0
 <dt>1.02 - Nov 21, 2011</dt><dd>
 <ul>
 <li>
-<b> BUG FIXED </b> in threefry2xW_R(R<20, ...).  Earlier implementations of
+<b> BUG FIXED </b> in threefry2xW_R(R&lt;20, ...).  Earlier implementations of
 threefry2x32_R and threfry2x64_R produced incorrect
 results when called with the number of rounds less than 20.
 The bug caused extra work to be done in every call, possibly resulting in <i>more</i>

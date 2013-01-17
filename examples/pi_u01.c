@@ -45,6 +45,7 @@ int main(int argc, char **argv){
     threefry2x64_key_t k = {{R123_64BIT(0xdeadbeef12345678)}};
     threefry2x32_ctr_t ch = {{0}}, rh;
     threefry2x32_key_t kh = {{0xdecafbad}};
+    (void)argc; (void)argv; /* unused */
     printf("%lu uniform doubles from threefry2x64\n", NTRIES);
     while (tries < NTRIES) {
             double x, y;

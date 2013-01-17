@@ -35,18 +35,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * permutations of RNGs and NxW and R.
  */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <errno.h>
-#include "util.h"
+#include "util_cuda.h"
 
 #include "Random123/philox.h"
 #include "Random123/threefry.h"
 
 #include "time_misc.h"
 #include "util_print.h"
-#include "util_cuda.h"
 
 #define KERNEL __global__
 #define get_global_id(i) (blockDim.x * blockIdx.x + threadIdx.x)

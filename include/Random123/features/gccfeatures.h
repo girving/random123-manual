@@ -69,18 +69,37 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define R123_BUILTIN_EXPECT(expr,likely) __builtin_expect(expr,likely)
 #endif
 
-#ifndef R123_USE_CXX0X
 /* According to the C++0x standard, we should be able to test the numeric
    value of __cplusplus == 199701L for C++98, __cplusplus == 201103L for C++0x
    But gcc has had an open bug  http://gcc.gnu.org/bugzilla/show_bug.cgi?id=1773
-   since early 2001, which may finally be fixed in 4.7 (late 2011) */
-/* See the comments near r123m128i::r128m128i() = default in sse.h. for why
- we conditionalize CXX0X usage on GNU_VERSION */
-#if defined( __GXX_EXPERIMENTAL_CXX0X__ ) && GNU_VERSION >= 40600
-#define R123_USE_CXX0X 1
-#else
-#define R123_USE_CXX0X 0
+   since early 2001, which was finally fixed in 4.7 (early 2012).  For
+   earlier versions, the only way  to detect whether --std=c++0x was requested
+   on the command line is to look a t the __GCC_EXPERIMENTAL_CXX0X__ pp-symbol.
+*/
+#define GNU_CXX11 (__cplusplus>=201103L || (GNUC_VESRSION<40700 && defined(__GCC_EXPERIMENTAL_CXX0X__) ))
+
+#ifndef R123_USE_CXX11_UNRESTRICTED_UNIONS
+#define R123_USE_CXX11_UNRESTRICTED_UNIONS ((GNUC_VERSION >= 40600) && GNU_CXX11)
 #endif
+
+#ifndef R123_USE_CXX11_STATIC_ASSERT
+#define R123_USE_CXX11_STATIC_ASSERT ((GNUC_VERSION >= 40300) && GNU_CXX11)
+#endif
+
+#ifndef R123_USE_CXX11_CONSTEXPR
+#define R123_USE_CXX11_CONSTEXPR ((GNUC_VERSION >= 40600) && GNU_CXX11)
+#endif
+
+#ifndef R123_USE_CXX11_EXPLICIT_CONVERSIONS
+#define R123_USE_CXX11_EXPLICIT_CONVERSIONS ((GNUC_VERSION >= 40500) && GNU_CXX11)
+#endif
+
+#ifndef R123_USE_CXX11_RANDOM
+#define R123_USE_CXX11_RANDOM ((GNUC_VERSION>=40500) && GNU_CXX11)
+#endif
+
+#ifndef R123_USE_CXX11_TYPE_TRAITS
+#define R123_USE_CXX11_TYPE_TRAITS ((GNUC_VERSION>=40400) && GNU_CXX11)
 #endif
 
 #ifndef R123_USE_AES_NI
@@ -115,10 +134,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #else
 #define R123_USE_SSE 0
 #endif
-#endif
-
-#ifndef R123_USE_STD_RANDOM
-#define R123_USE_STD_RANDOM (R123_USE_CXX0X && GNUC_VERSION>=40500)
 #endif
 
 #ifndef R123_USE_AES_OPENSSL

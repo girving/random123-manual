@@ -32,17 +32,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // Simple OpenCL device kernel and host main program to
 // compute pi via random darts at a square
 
-#include <stdio.h>
-#include <string.h>
-#include <errno.h>
-
-#include "pi_check.h"
-
-// A few small utility functions and macros
-#include "util.h"
-
 // functions to do boilerplate OpenCL begin and end
 #include "util_opencl.h"
+#include "pi_check.h"
 
 // Include preprocessed kernel declaration for the array src 
 // The GNUmakefile will create pi_opencl_kernel.i in the build

@@ -14,6 +14,18 @@ extensive TestU01 suite</a> of statistical tests for random number generators.
 They are \b not suitable for use in cryptography or security
 even though they are constructed using principles drawn from cryptography.
 
+CBRNGs are as fast as, or faster than conventional RNGs, much
+easier to parallelize, use minimal memory/cache resources, and
+require very little code.  On modern architectures, the
+Random123 CBRNGs require a few cycles per byte of random data
+returned and return random data in convenient sizes (arrays of
+two or four elements, each element is an unsigned integer of 32
+or 64 bits.  The range of random numbers is the full
+representable range of the 32 or 64 bit unsigned integer) 
+The \c <Random123/u01.h> header contains utility functions
+to convert 32- and 64-bit unsigned integers to open or closed
+ranges of single or double precision floating point numbers.
+
 The Random123 library was written by John Salmon and Mark Moraes.  It is
 available from
 <a href="http://deshawresearch.com/resources_random123.html">
@@ -28,27 +40,29 @@ random123@deshawresearch.com.
 Unlike conventional RNGs, counter-based RNGs are 
 <b>stateless</b> functions (or function classes i.e. functors) whose
 arguments are a \e counter, and a \e key
-and whose return value is the same type as the counter.
+and returns a result of the same type as the counter.
 
-	value = CBRNGname(counter, key)
+	result = CBRNGname(counter, key)
 
-The returned value is a deterministic function of the key and counter,
+The returned result is a deterministic function of the key and counter,
 i.e. a unique (counter, key) tuple will always produce the same
 result.  The result is highly sensitive to small changes in the inputs,
 so that the sequence of values produced by simply
 incrementing the counter (or key) is effectively indistinguishable from a
 sequence of samples of a uniformly distributed random variable.
 
-CBRNGs are as fast as, or faster than conventional RNGs, much
-easier to parallelize, use minimal memory/cache resources, and
-require very little code.  On modern architectures, the Random123 CBRNGs
-require a few cycles per byte of random data returned and return random
-data in convenient sizes.
-
-The CBRNGs in the Random123 library work with counters and keys consisting of 
- of \e N words, where words have a width of \e W bits, encapsulated
-in @ref arrayNxW "r123arrayNxW" structs, or equivalently, for C++,
-in the  @ref r123::Array1x32 "ArrayNxW" typedefs in the r123 namespace.
+For all the CBRNGs in the Random123 library, the result and
+counter are the same type, specifically an array of \e N words,
+where words have a width of \e W bits, encapsulated in @ref
+arrayNxW "r123arrayNxW" structs, or equivalently, for C++, in
+the @ref r123::Array1x32 "ArrayNxW" typedefs in the r123
+namespace.   Keys are usually also arrayMxW types, but sometimes M is
+a different size than the counter N (e.g. Philox keys are half the
+number of elements as the counter, Threefry and ARS are the same number,
+AES uses an opaque key type rather than an array)  The N random
+numbers returned in \c result.v[] are unsigned integers of
+width W (32 or 64), and the range of the random numbers is the full
+range of the unsigned integer of that width (i.e. 0 to 2^W-1)
 
 In C++, all public names (classes, structs, typedefs, etc) are in the
 \c r123 namespace.  In C, the public names (functions, enums, structs,
@@ -284,14 +298,16 @@ We have tested the Random123 library with the following infrastructure
 
 <ul>
 <li>Linux, gcc (multiple versions from 3.4.3 through 4.6.1), on x86_64.
-<li>Linux, llvm-2.9 on x86_64.
-<li>Linux, openc64-4.2.4 on x86_64.
+<li>Linux, clang-2.9 on x86_64.
+<li>Linux, clang-3.0 with lib++ (2012-04-19 svn checkout) on x86_64.
+<li>Linux, open64-4.2.4 on x86_64.
+<li>Linux, Intel icc and icpc 12.0.2 on x86_64.
 <li>Linux, OpenCL (NVIDIA SDK 4.0.17) on GTX480, M2090 and GTX580 GPUs.
 <li>Linux, OpenCL (AMD APP SDK 2.4 or 2.5), on x86_64 CPUs and Radeon HD6970 GPUs.
 <li>Linux, OpenCL (Intel OpenCL 1.5), on x86_64 CPUs.
-<li>Linux, NVIDIA CUDA 3.2.16 or 4.0.17.
+<li>Linux, NVIDIA CUDA 3.2.16 and 4.0.17.
 <li>Linux, gcc-4.1.2 and 4.4.1 on x86.
-<li>Solaris, gcc-3.4.3 and Sun C 5.8, on x86_64 (problems with Sunpro C++ compiler).
+<li>Solaris, both gcc-3.4.3 and Sun C/C++ 5.8, on x86_64.
 <li>FreeBSD 8.2, gcc-4.2.1, on x86_64.
 <li>MacOS X 5.8, gcc-4.0.1, on x86.
 <li>MacOS X 5.8, llvm-2.9.1 on x86 (problems with catching C++ exceptions).

@@ -45,12 +45,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <Random123/philox.h>
 #include <Random123/MicroURNG.hpp>
 #include <Random123/ReinterpretCtr.hpp>
-#if R123_USE_STD_RANDOM
+#if R123_USE_CXX11_RANDOM
 #include <random>
 #endif
 #include <iostream>
 #include <iomanip>
-#include <stdint.h>
 #include "pi_check.h"
 
 using namespace r123;

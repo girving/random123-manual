@@ -36,6 +36,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * Avoid much boilerplate in every OpenCL program
  */
 
+#include "util.h"
+
 #if defined(__APPLE__) || defined(__MACOSX)
 #include <OpenCL/cl.h>
 #include <OpenCL/cl_ext.h>
@@ -43,8 +45,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <CL/cl.h>
 #include <CL/cl_ext.h>
 #endif
-
-#include "util.h"
 
 #define UCL_STRSIZE 128
 
@@ -212,6 +212,9 @@ static UCLInfo *opencl_init(const char *devstr, const char *src,
 		cores *= 16*4;
 	    } else if (strcmp("Cypress", uc.devname) == 0) {
 		cores *= 16*5;
+	    } else if (strstr(uc.devname, "GTX 680")) {
+		/* Kepler has 192 cores per SMX */
+		cores *= 192;
 	    } else if (strstr(uc.devname, "GTX 580") ||
 		       strstr(uc.devname, "GTX 480") ||
 		       strstr(uc.devname, "C20") ||
@@ -221,6 +224,7 @@ static UCLInfo *opencl_init(const char *devstr, const char *src,
 		 * computeflags to figure this out?
 		 */
 		cores *= 32;
+
 	    }
 	    /* clkfreq is in Megahertz! */
 	    uc.cycles = 1e6 * uc.clkfreq * cores;

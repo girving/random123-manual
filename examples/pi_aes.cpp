@@ -42,7 +42,7 @@ using namespace r123;
 
 #include "pi_check.h"
 
-int main(int argc, char **argv){
+int main(int, char **){
 #if R123_USE_AES_NI
     unsigned long hits = 0, tries = 0;
     const int64_t two_to_the_62 = ((int64_t)1)<<62;
@@ -77,7 +77,7 @@ int main(int argc, char **argv){
     }
     return pi_check(hits, tries);
 #else
-    std::cerr << "AESNI RNG not compiled into this binary, skipping the pi_aes test." << std::endl;
+    std::cout << "AESNI RNG not compiled into this binary, skipping the pi_aes test.\n";
     return 0;	// Not a failure to not have AESNI compiled into this.
 #endif
 }

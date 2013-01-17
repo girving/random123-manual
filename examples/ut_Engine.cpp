@@ -42,10 +42,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <Random123/ars.h>
 #include <Random123/conventional/Engine.hpp>
 #include <Random123/ReinterpretCtr.hpp>
-#if R123_USE_STD_RANDOM
+#if R123_USE_CXX11_RANDOM
 #include <random>
 #endif
-#include <stdint.h>
 #include <cassert>
 #include <iostream>
 #include <sstream>
@@ -140,12 +139,12 @@ void doit(){
     oss << e2;
     string s2 = oss.str();
     int fiftyfive = 55;
-#if R123_USE_CXX0X
-    // With CXX0X, the library has type_traits to prevent
+#if R123_USE_CXX11_TYPE_TRAITS
+    // With CXX11, the library has type_traits to prevent
     // undesirable type resolution against the templated SeedSeq constructor
     EType e3(fiftyfive);
 #else
-    // Without CXX0X, we have to be careful to pass in
+    // Without CXX11, we have to be careful to pass in
     // a bona fide rtype, and not just something that will promote
     // to an rtype, if we want the rtype constructor.
     EType e3((rtype(fiftyfive)));
@@ -212,7 +211,7 @@ void doit(){
     cout << " OK" << endl;
 }
 
-int main(int argc, char **argv){
+int main(int, char **){
 #if R123_USE_PHILOX_64BIT
     doit<Engine<Philox2x64 > >();
     doit<Engine<ReinterpretCtr<r123array4x32, Philox2x64 > > >();

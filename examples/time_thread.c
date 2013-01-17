@@ -35,12 +35,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * different permutations of RNGs and NxW and R.
  */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <errno.h>
-#include <sys/stat.h>
 #include "util.h"
+#include <sys/stat.h>
 
 #include "Random123/philox.h"
 #include "Random123/threefry.h"
@@ -76,6 +72,7 @@ R123_STATIC_INLINE int get_global_id(int x)
 {
     int i;
     pthread_t me = pthread_self();
+    (void)x; /* why is this an arg? */
     for (i = 0; i < thread_count; i++) {
 	if (thread_info[i].started && pthread_equal(me, thread_info[i].tid))
 	    return i;

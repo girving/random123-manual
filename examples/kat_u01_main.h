@@ -190,6 +190,7 @@ main(int argc, char **argv)
     uint64_t *inp;
     KatU01Result *out;
     
+    (void)argc; /* unused */
     progname = argv[0];
     if ((cp = getenv("KAT_U01_DEBUG")) != NULL) debug = atoi(cp);
     /* First test that hextod appears to work */

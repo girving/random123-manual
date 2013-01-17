@@ -29,10 +29,47 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-#ifndef __llvmfeatures_dot_hpp
-#define __llvmfeatures_dot_hpp
+#ifndef __clangfeatures_dot_hpp
+#define __clangfeatures_dot_hpp
 
-/* The gcc features seem to work, but this is a placeholder in case they don't. */
+#ifndef R123_USE_X86INTRIN_H
+#define R123_USE_X86INTRIN_H 1
+#endif
+
+#ifndef R123_USE_CXX11_UNRESTRICTED_UNIONS
+#define R123_USE_CXX11_UNRESTRICTED_UNIONS __has_feature(cxx_unrestricted_unions)
+#endif
+
+#ifndef R123_USE_CXX11_STATIC_ASSERT
+#define R123_USE_CXX11_STATIC_ASSERT __has_feature(cxx_static_assert)
+#endif
+
+#ifndef R123_USE_CXX11_CONSTEXPR
+#define R123_USE_CXX11_CONSTEXPR __has_feature(cxx_constexpr)
+#endif
+
+#ifndef R123_USE_CXX11_EXPLICIT_CONVERSIONS
+#define R123_USE_CXX11_EXPLICIT_CONVERSIONS __has_feature(cxx_explicit_conversions)
+#endif
+
+// With clang-3.0, the apparently simpler:
+//  #define R123_USE_CXX11_RANDOM __has_include(<random>)
+// dumps core.
+#ifndef R123_USE_CXX11_RANDOM
+#if __cplusplus>=201103L && __has_include(<random>)
+#define R123_USE_CXX11_RANDOM 1
+#else
+#define R123_USE_CXX11_RANDOM 0
+#endif
+#endif
+
+#ifndef R123_USE_CXX11_TYPE_TRAITS
+#if __cplusplus>=201103L && __has_include(<type_traits>)
+#define R123_USE_CXX11_TYPE_TRAITS 1
+#else
+#define R123_USE_CXX11_TYPE_TRAITS 0
+#endif
+#endif
 
 #include "gccfeatures.h"
 

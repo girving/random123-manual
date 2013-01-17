@@ -246,7 +246,7 @@ void doit(size_t N, size_t W){
 }
 
 
-int main(int argc, char **argv){
+int main(int, char **){
 #if R123_USE_SSE
     doit<r123array1xm128i>(1, 128);
 #endif

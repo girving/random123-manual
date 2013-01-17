@@ -47,6 +47,7 @@ int main(int argc, char **argv){
     unsigned long save, x;
     unsigned long saved[5];
     double sum = 0.;
+    (void)argc; (void)argv; /* unused */
 
     r = gsl_rng_alloc(gsl_rng_cbrng);
     assert (gsl_rng_min(r) == 0);

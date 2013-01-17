@@ -39,7 +39,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <Random123/threefry.h>
 
 /*
- * counthits generates 2*n x,y points and returns hits[tid] with
+ * counthits generates n x,y points and returns hits[tid] with
  * the count of number of those points within the unit circle on
  * each thread.
  */

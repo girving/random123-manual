@@ -5,6 +5,7 @@
 :: Call this with the argument "run" if you want to only run the 
 :: previously compiled executables.
 @echo off
+setlocal
 if not "%1"=="run" goto :Default
 set CC=echo
 set CFLAGS=
@@ -27,14 +28,16 @@ set NEWBUILDVC=amd64
 
 :Next
 if "%BUILDVC%"=="%NEWBUILDVC%" goto :Continue
-call "c:\Program Files (x86)\Microsoft Visual Studio 10.0\vc\vcvarsall.bat" %NEWBUILDVC%
+if NOT DEFINED VCBAT set VCBAT="c:\Program Files (x86)\Microsoft Visual Studio 10.0\vc\vcvarsall.bat"
+call %VCBAT% %NEWBUILDVC%
 if errorlevel 1 exit /b 1
 set BUILDVC=%NEWBUILDVC%
 
 :Continue
 :: /Zi for debug.  /favor:INTEL64 is ignored for 32bit compiles.
-set CFLAGS=/I..\include /W3 /Ox /EHs /nologo /favor:INTEL64
+if NOT DEFINED CFLAGS set CFLAGS=/I..\include /W3 /Ox /EHs /nologo /favor:INTEL64
 set CC=cl
+echo Using %VCBAT%
 echo Building for %BUILDVC% with %CC% %CFLAGS%
 
 :Loop
@@ -44,3 +47,4 @@ FOR %%A IN %BUILDFILES% DO (
 	if errorlevel 1 exit /b 1
 	%%~nA 
 	if errorlevel 1 exit /b 1 )
+endlocal

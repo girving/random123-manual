@@ -48,6 +48,7 @@ int main(int argc, char **argv){
     threefry2x64_key_t key = {{0, 0}};
     threefry2x64_ctr_t ctr = {{0, 0}};
     enum { int32s_per_counter = sizeof(ctr)/sizeof(int32_t) };
+    (void)argc;(void)argv; /* unused  */
 
     printf("Throwing %lu darts at a square board using threefry2x64\n", NTRIES);
 
