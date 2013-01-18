@@ -154,7 +154,20 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif
 
 #ifndef R123_USE_ASM_GNU
-#define R123_USE_ASM_GNU 1
+#define R123_USE_ASM_GNU (defined(__x86_64__)||defined(__i386__))
+#endif
+
+#ifndef R123_USE_MULHILO64_MULHI_INTRIN
+#define R123_USE_MULHILO64_MULHI_INTRIN (defined(__powerpc64__))
+#endif
+
+#if R123_USE_MULHILO64_MULHI_INTRIN && !defined(R123_MULHILO64_MULHI_INTRIN)
+#    if defined(__powerpc64__)
+#      include <ppu_intrinsics.h>
+#      define R123_MULHILO64_MULHI_INTRIN __mulhdu
+#    else
+#      error "If you define R123_USE_MULHILO64_MULHI_INTRIN, then on this architecture you must also define R123_MULHILO64_MULHI_INTRIN."
+#    endif
 #endif
 
 #ifndef R123_USE_CPUID_MSVC

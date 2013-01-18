@@ -170,6 +170,8 @@ _mulhilo_msvc_intrin_tpl(64, uint64_t, _umul128)
 _mulhilo_cuda_intrin_tpl(64, uint64_t, __umul64hi)
 #elif R123_USE_MULHILO64_OPENCL_INTRIN
 _mulhilo_cuda_intrin_tpl(64, uint64_t, mul_hi)
+#elif R123_USE_MULHILO64_MULHI_INTRIN
+_mulhilo_cuda_intrin_tpl(64, uint64_t, R123_MULHILO64_MULHI_INTRIN)
 #elif R123_USE_GNU_UINT128
 _mulhilo_dword_tpl(64, uint64_t, __uint128_t)
 #elif R123_USE_MULHILO64_C99
